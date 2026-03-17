@@ -1,0 +1,56 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+    
+    - name: Create Project Structure
+      run: |
+        chmod +x setup-project.sh
+        bash setup-project.sh
+    
+    - name: Build APK
+      run: |
+        cd quran-app
+        chmod +x gradlew
+        ./gradlew assembleRelease --no-daemon
+    
+    - name: Sign APK
+      run: |
+        cd quran-app
+        keytool -genkey -v -keystore release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias quran -storepass quran123 -keypass quran123 -dname "CN=Meshari, OU=Dev, O=Meshari Tech, L=Riyadh, ST=Riyadh, C=SA"
+        ${ANDROID_HOME}/build-tools/35.0.0/apksigner sign --ks release-key.jks --ks-pass pass:quran123 --key-pass pass:quran123 --out app/build/outputs/apk/release/quran-signed.apk app/build/outputs/apk/release/app-release-unsigned.apk || ${ANDROID_HOME}/build-tools/34.0.0/apksigner sign --ks release-key.jks --ks-pass pass:quran123 --key-pass pass:quran123 --out app/build/outputs/apk/release/quran-signed.apk app/build/outputs/apk/release/app-release-unsigned.apk
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: quran-apk
+        path: quran-app/app/build/outputs/apk/release/*.apk
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      if: github.ref == 'refs/heads/main'
+      with:
+        tag_name: v1.0.${{ github.run_number }}
+        name: "القرآن الكريم v1.0.${{ github.run_number }}"
+        files: quran-app/app/build/outputs/apk/release/quran-signed.apk
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
