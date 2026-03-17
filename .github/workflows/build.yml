@@ -26,16 +26,15 @@ jobs:
           chmod +x setup-project.sh
           bash setup-project.sh
 
-      - name: Generate Gradle Wrapper
-        run: |
-          cd quran-app
-          gradle wrapper --gradle-version 8.5
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.5'
 
       - name: Build APK
         run: |
           cd quran-app
-          chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          gradle assembleRelease --no-daemon
 
       - name: Sign APK
         run: |
