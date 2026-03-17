@@ -6,6 +6,9 @@ PKG="tech.meshari.quran"
 PKG_PATH="tech/meshari/quran"
 
 mkdir -p $PROJECT/app/src/main/java/$PKG_PATH
+mkdir -p $PROJECT/app/src/main/java/$PKG_PATH/data
+mkdir -p $PROJECT/app/src/main/java/$PKG_PATH/ui
+mkdir -p $PROJECT/app/src/main/java/$PKG_PATH/api
 mkdir -p $PROJECT/app/src/main/res/layout
 mkdir -p $PROJECT/app/src/main/res/values
 mkdir -p $PROJECT/app/src/main/res/values-night
@@ -17,26 +20,20 @@ mkdir -p $PROJECT/app/src/main/res/mipmap-xxhdpi
 mkdir -p $PROJECT/app/src/main/res/mipmap-xxxhdpi
 mkdir -p $PROJECT/app/src/main/res/xml
 mkdir -p $PROJECT/app/src/main/res/anim
+mkdir -p $PROJECT/app/src/main/res/menu
+mkdir -p $PROJECT/app/src/main/res/font
 mkdir -p $PROJECT/gradle/wrapper
 
-# Download logo from server
+# Download logo
 curl -sL "https://quran.meshari.tech/logoo.png" -o $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
-cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
-cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/mipmap-xhdpi/ic_launcher.png
-cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/mipmap-hdpi/ic_launcher.png
-cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/mipmap-mdpi/ic_launcher.png
-
-# Also copy as round icon
+for d in xxhdpi xhdpi hdpi mdpi; do
+  cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/mipmap-${d}/ic_launcher.png
+  cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/mipmap-${d}/ic_launcher_round.png
+done
 cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
-cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
-cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png
-cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
-cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
+cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/drawable/app_logo.png
 
-# Copy logo to drawable for splash screen
-cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/drawable/splash_logo.png
-
-# settings.gradle.kts
+# ========== settings.gradle.kts ==========
 cat > $PROJECT/settings.gradle.kts << 'SETTINGS'
 pluginManagement {
     repositories {
@@ -46,6 +43,7 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
@@ -55,164 +53,523 @@ rootProject.name = "QuranApp"
 include(":app")
 SETTINGS
 
-# build.gradle.kts (project)
-cat > $PROJECT/build.gradle.kts << 'BUILD'
+# ========== build.gradle.kts (root) ==========
+cat > $PROJECT/build.gradle.kts << 'ROOTBUILD'
 plugins {
     id("com.android.application") version "8.2.0" apply false
-    id("org.jetbrains.kotlin.android") version "1.9.20" apply false
+    id("org.jetbrains.kotlin.android") version "1.9.22" apply false
 }
-BUILD
+ROOTBUILD
 
-# gradle.properties
-cat > $PROJECT/gradle.properties << 'PROPS'
-org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
-android.useAndroidX=true
-android.nonTransitiveRClass=true
-kotlin.code.style=official
-PROPS
-
-# gradle-wrapper.properties
-cat > $PROJECT/gradle/wrapper/gradle-wrapper.properties << 'WRAPPER'
-distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
-networkTimeout=10000
-validateDistributionUrl=true
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists
-WRAPPER
-
-# app/build.gradle.kts
+# ========== app/build.gradle.kts ==========
 cat > $PROJECT/app/build.gradle.kts << 'APPBUILD'
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
-
 android {
     namespace = "tech.meshari.quran"
     compileSdk = 34
-
     defaultConfig {
         applicationId = "tech.meshari.quran"
         minSdk = 24
         targetSdk = 34
-        versionCode = 3
-        versionName = "2.0.0"
+        versionCode = 4
+        versionName = "3.0.0"
     }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-        }
-    }
-
+    buildFeatures { viewBinding = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
-    buildFeatures {
-        viewBinding = true
+    kotlinOptions { jvmTarget = "17" }
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+        }
     }
 }
-
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.cardview:cardview:1.0.0")
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("androidx.media:media:1.7.0")
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.webkit:webkit:1.9.0")
-    implementation("androidx.core:core-splashscreen:1.0.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 }
 APPBUILD
 
-# proguard-rules.pro
-cat > $PROJECT/app/proguard-rules.pro << 'PROGUARD'
--keepattributes JavascriptInterface
--keepclassmembers class tech.meshari.quran.WebAppInterface {
-    public *;
-}
-PROGUARD
-
-# AndroidManifest.xml
+# ========== AndroidManifest.xml ==========
 cat > $PROJECT/app/src/main/AndroidManifest.xml << 'MANIFEST'
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="القرآن الكريم"
         android:supportsRtl="true"
-        android:theme="@style/Theme.QuranApp"
-        android:usesCleartextTraffic="false"
-        android:networkSecurityConfig="@xml/network_security_config">
-
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.QuranApp.Splash"
-            android:screenOrientation="portrait">
+            android:theme="@style/SplashTheme">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="quran.meshari.tech" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".MainActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
-            android:hardwareAccelerated="true" />
-
+        <activity android:name=".MainActivity" android:screenOrientation="portrait"/>
     </application>
 </manifest>
 MANIFEST
 
-# network_security_config.xml
-cat > $PROJECT/app/src/main/res/xml/network_security_config.xml << 'NETSEC'
+# ========== colors.xml ==========
+cat > $PROJECT/app/src/main/res/values/colors.xml << 'COLORS'
 <?xml version="1.0" encoding="utf-8"?>
-<network-security-config>
-    <domain-config cleartextTrafficPermitted="false">
-        <domain includeSubdomains="true">quran.meshari.tech</domain>
-        <domain includeSubdomains="true">meshari.tech</domain>
-    </domain-config>
-</network-security-config>
-NETSEC
+<resources>
+    <color name="primary">#1B3A2D</color>
+    <color name="primary_dark">#0F2318</color>
+    <color name="primary_variant">#2D5A45</color>
+    <color name="accent">#C8A84E</color>
+    <color name="accent_light">#E8D59A</color>
+    <color name="gold">#D4A847</color>
+    <color name="gold_dark">#B8922E</color>
+    <color name="bg_dark">#0A1929</color>
+    <color name="bg_card">#132F4C</color>
+    <color name="bg_card_light">#1A3D5C</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B0BEC5</color>
+    <color name="text_gold">#D4A847</color>
+    <color name="surface">#11273E</color>
+    <color name="divider">#1E3A5F</color>
+    <color name="surah_number_bg">#D4A847</color>
+    <color name="meccan_badge">#4CAF50</color>
+    <color name="medinan_badge">#2196F3</color>
+    <color name="bottom_nav_bg">#0D2137</color>
+    <color name="ripple_gold">#33D4A847</color>
+</resources>
+COLORS
 
-# SplashActivity.kt - Native splash screen with logoo.png
-cat > $PROJECT/app/src/main/java/$PKG_PATH/SplashActivity.kt << 'SPLASH'
+# ========== themes.xml ==========
+cat > $PROJECT/app/src/main/res/values/themes.xml << 'THEMES'
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@color/bg_dark</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
+        <item name="android:navigationBarColor">@color/bottom_nav_bg</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+    <style name="SplashTheme" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:windowBackground">@color/primary_dark</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
+        <item name="android:navigationBarColor">@color/primary_dark</item>
+    </style>
+    <style name="GoldButton" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/gold</item>
+        <item name="android:textColor">#1B3A2D</item>
+        <item name="android:textSize">16sp</item>
+        <item name="cornerRadius">25dp</item>
+    </style>
+</resources>
+THEMES
+
+# ========== strings.xml ==========
+cat > $PROJECT/app/src/main/res/values/strings.xml << 'STRINGS'
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">القرآن الكريم</string>
+    <string name="tab_quran">القرآن</string>
+    <string name="tab_prayer">الصلاة</string>
+    <string name="tab_qibla">القبلة</string>
+    <string name="tab_bookmarks">المحفوظات</string>
+    <string name="search_hint">ابحث في القرآن...</string>
+    <string name="no_internet">لا يوجد اتصال بالإنترنت</string>
+    <string name="loading">جاري التحميل...</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="page_of">صفحة %1$d من 604</string>
+    <string name="surah_list">فهرس السور</string>
+    <string name="all">الكل</string>
+    <string name="meccan">مكية</string>
+    <string name="medinan">مدنية</string>
+    <string name="ayahs">%d آية</string>
+    <string name="tafsir">التفسير</string>
+    <string name="select_reciter">اختر القارئ</string>
+    <string name="fajr">الفجر</string>
+    <string name="sunrise">الشروق</string>
+    <string name="dhuhr">الظهر</string>
+    <string name="asr">العصر</string>
+    <string name="maghrib">المغرب</string>
+    <string name="isha">العشاء</string>
+</resources>
+STRINGS
+
+# ========== bottom_nav_menu.xml ==========
+cat > $PROJECT/app/src/main/res/menu/bottom_nav.xml << 'MENU'
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/nav_quran" android:icon="@android:drawable/ic_menu_agenda" android:title="@string/tab_quran"/>
+    <item android:id="@+id/nav_prayer" android:icon="@android:drawable/ic_menu_my_calendar" android:title="@string/tab_prayer"/>
+    <item android:id="@+id/nav_qibla" android:icon="@android:drawable/ic_menu_compass" android:title="@string/tab_qibla"/>
+    <item android:id="@+id/nav_bookmarks" android:icon="@android:drawable/ic_menu_save" android:title="@string/tab_bookmarks"/>
+</menu>
+MENU
+
+# ========== activity_splash.xml ==========
+cat > $PROJECT/app/src/main/res/layout/activity_splash.xml << 'SPLASHLAYOUT'
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:gravity="center"
+    android:background="@color/primary_dark">
+    <ImageView android:id="@+id/splashLogo"
+        android:layout_width="180dp" android:layout_height="180dp"
+        android:src="@drawable/app_logo" android:alpha="0"/>
+    <TextView android:id="@+id/splashTitle"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="القرآن الكريم" android:textColor="@color/gold"
+        android:textSize="32sp" android:textStyle="bold"
+        android:layout_marginTop="24dp" android:alpha="0"/>
+    <TextView android:id="@+id/splashSubtitle"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="quran.meshari.tech" android:textColor="@color/text_secondary"
+        android:textSize="14sp" android:layout_marginTop="8dp" android:alpha="0"/>
+</LinearLayout>
+SPLASHLAYOUT
+
+# ========== activity_main.xml ==========
+cat > $PROJECT/app/src/main/res/layout/activity_main.xml << 'MAINLAYOUT'
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/bg_dark">
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent" android:layout_height="56dp"
+        android:background="@color/primary" app:titleTextColor="@color/gold"
+        app:title="القرآن الكريم" app:navigationIcon="@drawable/app_logo">
+        <ImageView android:layout_width="32dp" android:layout_height="32dp"
+            android:src="@drawable/app_logo" android:layout_gravity="end"
+            android:layout_marginEnd="16dp"/>
+    </com.google.android.material.appbar.MaterialToolbar>
+    <FrameLayout android:id="@+id/fragmentContainer"
+        android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1"/>
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:background="@color/bottom_nav_bg"
+        app:itemTextColor="@color/gold" app:itemIconTint="@color/gold"
+        app:labelVisibilityMode="labeled" app:menu="@menu/bottom_nav"/>
+</LinearLayout>
+MAINLAYOUT
+
+# ========== fragment_surah_list.xml ==========
+cat > $PROJECT/app/src/main/res/layout/fragment_surah_list.xml << 'SURAHLISTLAYOUT'
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/bg_dark">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="16dp"
+        android:background="@color/primary">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="🕌 القرآن الكريم" android:textColor="@color/gold"
+            android:textSize="22sp" android:textStyle="bold" android:gravity="center"/>
+        <EditText android:id="@+id/searchEdit"
+            android:layout_width="match_parent" android:layout_height="48dp"
+            android:layout_marginTop="12dp" android:hint="@string/search_hint"
+            android:textColorHint="@color/text_secondary" android:textColor="@color/text_primary"
+            android:background="@drawable/search_bg" android:paddingStart="16dp"
+            android:paddingEnd="16dp" android:textSize="15sp" android:singleLine="true"
+            android:drawableStart="@android:drawable/ic_menu_search"
+            android:drawablePadding="8dp" android:inputType="text"/>
+        <LinearLayout android:id="@+id/filterButtons"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:gravity="center" android:layout_marginTop="8dp" android:orientation="horizontal">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAll" style="@style/GoldButton"
+                android:layout_width="wrap_content" android:layout_height="36dp"
+                android:text="@string/all" android:textSize="13sp" android:layout_marginEnd="8dp"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMeccan" style="@style/GoldButton"
+                android:layout_width="wrap_content" android:layout_height="36dp"
+                android:text="@string/meccan" android:textSize="13sp" android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/bg_card"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMedinan" style="@style/GoldButton"
+                android:layout_width="wrap_content" android:layout_height="36dp"
+                android:text="@string/medinan" android:textSize="13sp"
+                android:backgroundTint="@color/bg_card"/>
+        </LinearLayout>
+    </LinearLayout>
+    <androidx.recyclerview.widget.RecyclerView android:id="@+id/surahRecycler"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:padding="8dp" android:clipToPadding="false"/>
+</LinearLayout>
+SURAHLISTLAYOUT
+
+# ========== item_surah.xml ==========
+cat > $PROJECT/app/src/main/res/layout/item_surah.xml << 'ITEMSURAH'
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_margin="4dp" app:cardBackgroundColor="@color/bg_card"
+    app:cardCornerRadius="12dp" app:cardElevation="2dp"
+    app:strokeWidth="0dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:padding="14dp"
+        android:gravity="center_vertical">
+        <FrameLayout android:layout_width="44dp" android:layout_height="44dp">
+            <View android:layout_width="44dp" android:layout_height="44dp"
+                android:background="@drawable/circle_gold"/>
+            <TextView android:id="@+id/surahNumber"
+                android:layout_width="match_parent" android:layout_height="match_parent"
+                android:gravity="center" android:textColor="@color/primary_dark"
+                android:textSize="16sp" android:textStyle="bold"/>
+        </FrameLayout>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:orientation="vertical"
+            android:layout_marginStart="14dp" android:layout_marginEnd="8dp">
+            <TextView android:id="@+id/surahNameAr"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/text_primary" android:textSize="18sp"
+                android:textStyle="bold"/>
+            <TextView android:id="@+id/surahNameEn"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/text_secondary" android:textSize="12sp"/>
+        </LinearLayout>
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:orientation="vertical" android:gravity="end">
+            <TextView android:id="@+id/surahType"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/accent_light" android:textSize="11sp"
+                android:background="@drawable/badge_bg" android:paddingStart="8dp"
+                android:paddingEnd="8dp" android:paddingTop="2dp" android:paddingBottom="2dp"/>
+            <TextView android:id="@+id/surahAyahs"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/text_secondary" android:textSize="12sp"
+                android:layout_marginTop="4dp"/>
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
+ITEMSURAH
+
+# ========== fragment_reader.xml ==========
+cat > $PROJECT/app/src/main/res/layout/fragment_reader.xml << 'READERLAYOUT'
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/bg_dark">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:background="@color/primary" android:padding="10dp"
+        android:gravity="center_vertical" android:orientation="horizontal">
+        <ImageView android:id="@+id/btnBack"
+            android:layout_width="32dp" android:layout_height="32dp"
+            android:src="@android:drawable/ic_menu_revert" android:padding="4dp"/>
+        <TextView android:id="@+id/surahTitle"
+            android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:textColor="@color/gold"
+            android:textSize="20sp" android:textStyle="bold" android:gravity="center"/>
+        <TextView android:id="@+id/pageInfo"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary" android:textSize="12sp"/>
+    </LinearLayout>
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1">
+        <ImageView android:id="@+id/quranPageImage"
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:scaleType="fitCenter" android:background="#FFFFF8E1"/>
+        <ProgressBar android:id="@+id/pageLoading"
+            android:layout_width="48dp" android:layout_height="48dp"
+            android:layout_gravity="center" android:indeterminateTint="@color/gold"/>
+    </FrameLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:background="@color/primary" android:padding="8dp"
+        android:gravity="center" android:orientation="horizontal">
+        <ImageView android:id="@+id/btnNext"
+            android:layout_width="48dp" android:layout_height="48dp"
+            android:src="@android:drawable/ic_media_previous" android:padding="12dp"
+            android:background="?selectableItemBackgroundBorderless"/>
+        <Spinner android:id="@+id/reciterSpinner"
+            android:layout_width="0dp" android:layout_height="40dp"
+            android:layout_weight="1" android:layout_marginStart="8dp"
+            android:layout_marginEnd="4dp" android:background="@drawable/spinner_bg"
+            android:popupBackground="@color/bg_card"/>
+        <ImageView android:id="@+id/btnPlay"
+            android:layout_width="48dp" android:layout_height="48dp"
+            android:src="@android:drawable/ic_media_play" android:padding="8dp"
+            android:background="@drawable/circle_gold"/>
+        <ImageView android:id="@+id/btnTafsir"
+            android:layout_width="48dp" android:layout_height="48dp"
+            android:src="@android:drawable/ic_menu_info_details" android:padding="12dp"
+            android:layout_marginStart="4dp"
+            android:background="?selectableItemBackgroundBorderless"/>
+        <ImageView android:id="@+id/btnPrev"
+            android:layout_width="48dp" android:layout_height="48dp"
+            android:src="@android:drawable/ic_media_next" android:padding="12dp"
+            android:background="?selectableItemBackgroundBorderless"/>
+    </LinearLayout>
+</LinearLayout>
+READERLAYOUT
+
+# ========== fragment_prayer.xml ==========
+cat > $PROJECT/app/src/main/res/layout/fragment_prayer.xml << 'PRAYERLAYOUT'
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/bg_dark">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="20dp" android:gravity="center">
+        <ImageView android:layout_width="80dp" android:layout_height="80dp"
+            android:src="@drawable/app_logo" android:layout_marginTop="16dp"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="🕌 أوقات الصلاة" android:textColor="@color/gold"
+            android:textSize="24sp" android:textStyle="bold" android:layout_marginTop="12dp"/>
+        <TextView android:id="@+id/cityName"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary" android:textSize="14sp"
+            android:layout_marginTop="4dp"/>
+        <TextView android:id="@+id/hijriDate"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textColor="@color/accent_light" android:textSize="13sp"
+            android:layout_marginTop="4dp"/>
+        <ProgressBar android:id="@+id/prayerLoading"
+            android:layout_width="48dp" android:layout_height="48dp"
+            android:layout_marginTop="24dp" android:indeterminateTint="@color/gold"/>
+        <LinearLayout android:id="@+id/prayerContainer"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:layout_marginTop="16dp"
+            android:visibility="gone"/>
+    </LinearLayout>
+</ScrollView>
+PRAYERLAYOUT
+
+# ========== fragment_qibla.xml ==========
+cat > $PROJECT/app/src/main/res/layout/fragment_qibla.xml << 'QIBLALAYOUT'
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:gravity="center"
+    android:background="@color/bg_dark" android:padding="24dp">
+    <ImageView android:layout_width="80dp" android:layout_height="80dp"
+        android:src="@drawable/app_logo"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="🧭 اتجاه القبلة" android:textColor="@color/gold"
+        android:textSize="26sp" android:textStyle="bold" android:layout_marginTop="16dp"/>
+    <FrameLayout android:layout_width="260dp" android:layout_height="260dp"
+        android:layout_marginTop="32dp">
+        <View android:id="@+id/compassView"
+            android:layout_width="260dp" android:layout_height="260dp"/>
+        <TextView android:id="@+id/qiblaDirection"
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:gravity="center" android:textColor="@color/gold"
+            android:textSize="48sp" android:textStyle="bold" android:text="🕋"/>
+    </FrameLayout>
+    <TextView android:id="@+id/qiblaDegrees"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="@color/text_secondary" android:textSize="18sp"
+        android:layout_marginTop="16dp"/>
+</LinearLayout>
+QIBLALAYOUT
+
+# ========== fragment_bookmarks.xml ==========
+cat > $PROJECT/app/src/main/res/layout/fragment_bookmarks.xml << 'BOOKMARKSLAYOUT'
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/bg_dark">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:background="@color/primary" android:padding="16dp" android:gravity="center">
+        <ImageView android:layout_width="28dp" android:layout_height="28dp"
+            android:src="@drawable/app_logo" android:layout_marginEnd="8dp"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="📌 المحفوظات" android:textColor="@color/gold"
+            android:textSize="22sp" android:textStyle="bold"/>
+    </LinearLayout>
+    <TextView android:id="@+id/emptyBookmarks"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:text="لا توجد صفحات محفوظة\nاضغط ☆ في صفحة القرآن للحفظ"
+        android:textColor="@color/text_secondary" android:textSize="16sp"
+        android:gravity="center" android:visibility="gone"/>
+    <androidx.recyclerview.widget.RecyclerView android:id="@+id/bookmarksRecycler"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:padding="8dp"/>
+</LinearLayout>
+BOOKMARKSLAYOUT
+
+# ========== Drawable resources ==========
+cat > $PROJECT/app/src/main/res/drawable/search_bg.xml << 'SEARCHBG'
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#1A3D5C"/><corners android:radius="24dp"/>
+    <stroke android:width="1dp" android:color="#2D5A45"/>
+</shape>
+SEARCHBG
+
+cat > $PROJECT/app/src/main/res/drawable/circle_gold.xml << 'CIRCLEGOLD'
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+    <solid android:color="@color/gold"/>
+</shape>
+CIRCLEGOLD
+
+cat > $PROJECT/app/src/main/res/drawable/badge_bg.xml << 'BADGEBG'
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#1A3D5C"/><corners android:radius="10dp"/>
+</shape>
+BADGEBG
+
+cat > $PROJECT/app/src/main/res/drawable/spinner_bg.xml << 'SPINNERBG'
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#1A3D5C"/><corners android:radius="8dp"/>
+    <stroke android:width="1dp" android:color="@color/gold"/>
+    <padding android:left="12dp" android:right="12dp"/>
+</shape>
+SPINNERBG
+
+cat > $PROJECT/app/src/main/res/drawable/prayer_card_bg.xml << 'PRAYERCARD'
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/bg_card"/><corners android:radius="16dp"/>
+    <stroke android:width="1dp" android:color="@color/divider"/>
+</shape>
+PRAYERCARD
+
+# ========== SplashActivity.kt ==========
+cat > $PROJECT/app/src/main/java/$PKG_PATH/SplashActivity.kt << 'SPLASHKT'
 package tech.meshari.quran
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.view.animation.AlphaAnimation
-import android.view.animation.AnimationSet
-import android.view.animation.ScaleAnimation
+import android.view.animation.OvershootInterpolator
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -221,614 +578,657 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
-
         val logo = findViewById<ImageView>(R.id.splashLogo)
         val title = findViewById<TextView>(R.id.splashTitle)
         val subtitle = findViewById<TextView>(R.id.splashSubtitle)
-
-        // Animate logo
-        val scaleAnim = ScaleAnimation(0.5f, 1f, 0.5f, 1f,
-            ScaleAnimation.RELATIVE_TO_SELF, 0.5f,
-            ScaleAnimation.RELATIVE_TO_SELF, 0.5f)
-        scaleAnim.duration = 800
-
-        val fadeIn = AlphaAnimation(0f, 1f)
-        fadeIn.duration = 800
-
-        val animSet = AnimationSet(true)
-        animSet.addAnimation(scaleAnim)
-        animSet.addAnimation(fadeIn)
-        logo.startAnimation(animSet)
-
-        // Animate text with delay
-        val textFade = AlphaAnimation(0f, 1f)
-        textFade.duration = 600
-        textFade.startOffset = 400
-        title.startAnimation(textFade)
-
-        val subFade = AlphaAnimation(0f, 1f)
-        subFade.duration = 600
-        subFade.startOffset = 600
-        subtitle.startAnimation(subFade)
-
-        Handler(Looper.getMainLooper()).postDelayed({
+        val logoAlpha = ObjectAnimator.ofFloat(logo, "alpha", 0f, 1f).setDuration(600)
+        val logoScale = ObjectAnimator.ofFloat(logo, "scaleX", 0.3f, 1f).setDuration(800)
+        val logoScaleY = ObjectAnimator.ofFloat(logo, "scaleY", 0.3f, 1f).setDuration(800)
+        logoScale.interpolator = OvershootInterpolator()
+        logoScaleY.interpolator = OvershootInterpolator()
+        val titleAlpha = ObjectAnimator.ofFloat(title, "alpha", 0f, 1f).setDuration(500)
+        val titleY = ObjectAnimator.ofFloat(title, "translationY", 30f, 0f).setDuration(500)
+        val subAlpha = ObjectAnimator.ofFloat(subtitle, "alpha", 0f, 1f).setDuration(400)
+        AnimatorSet().apply {
+            playTogether(logoAlpha, logoScale, logoScaleY)
+            start()
+        }
+        logo.postDelayed({
+            AnimatorSet().apply { playTogether(titleAlpha, titleY); start() }
+        }, 500)
+        logo.postDelayed({ subAlpha.start() }, 800)
+        logo.postDelayed({
             startActivity(Intent(this, MainActivity::class.java))
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
             finish()
-        }, 2000)
+        }, 1800)
     }
 }
-SPLASH
+SPLASHKT
 
-# MainActivity.kt - Native app with toolbar and WebView
-cat > $PROJECT/app/src/main/java/$PKG_PATH/MainActivity.kt << 'MAIN'
+# ========== MainActivity.kt ==========
+cat > $PROJECT/app/src/main/java/$PKG_PATH/MainActivity.kt << 'MAINKT'
 package tech.meshari.quran
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.os.Bundle
-import android.view.View
-import android.webkit.*
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.appbar.MaterialToolbar
+import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import tech.meshari.quran.ui.*
 
 class MainActivity : AppCompatActivity() {
-
-    private lateinit var webView: WebView
-    private lateinit var progressBar: ProgressBar
-    private lateinit var swipeRefresh: SwipeRefreshLayout
-    private lateinit var toolbar: MaterialToolbar
-    private lateinit var bottomNav: BottomNavigationView
-    private lateinit var offlineView: View
-    private lateinit var toolbarTitle: TextView
-    private lateinit var toolbarLogo: ImageView
-
-    private val BASE_URL = "https://quran.meshari.tech"
-    private val LOCATION_REQUEST_CODE = 100
-
-    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        toolbar = findViewById(R.id.toolbar)
-        toolbarTitle = findViewById(R.id.toolbarTitle)
-        toolbarLogo = findViewById(R.id.toolbarLogo)
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
-
-        webView = findViewById(R.id.webView)
-        progressBar = findViewById(R.id.progressBar)
-        swipeRefresh = findViewById(R.id.swipeRefresh)
-        bottomNav = findViewById(R.id.bottomNav)
-        offlineView = findViewById(R.id.offlineView)
-
-        setupWebView()
-        setupSwipeRefresh()
-        setupBottomNav()
-        setupOfflineRetry()
-
-        if (isNetworkAvailable()) {
-            loadUrl(BASE_URL)
-        } else {
-            showOfflineView()
-        }
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun setupWebView() {
-        webView.settings.apply {
-            javaScriptEnabled = true
-            domStorageEnabled = true
-            databaseEnabled = true
-            cacheMode = WebSettings.LOAD_DEFAULT
-            setSupportZoom(false)
-            builtInZoomControls = false
-            displayZoomControls = false
-            loadWithOverviewMode = true
-            useWideViewPort = true
-            allowFileAccess = false
-            allowContentAccess = false
-            mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
-            userAgentString = webView.settings.userAgentString + " QuranApp/2.0"
-            mediaPlaybackRequiresUserGesture = false
-        }
-
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                progressBar.visibility = View.VISIBLE
-                offlineView.visibility = View.GONE
-            }
-
-            override fun onPageFinished(view: WebView?, url: String?) {
-                progressBar.visibility = View.GONE
-                swipeRefresh.isRefreshing = false
-                // Hide install banner inside webview (we have native app)
-                view?.evaluateJavascript(
-                    "document.getElementById('install-banner')?.remove();", null
-                )
-                // Inject native app detection
-                view?.evaluateJavascript(
-                    "window.isNativeApp = true; document.body.classList.add('native-app');", null
-                )
-            }
-
-            override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
-                if (request?.isForMainFrame == true) {
-                    showOfflineView()
-                }
-            }
-
-            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                val url = request?.url?.toString() ?: return false
-                return if (url.contains("quran.meshari.tech") || url.contains("meshari.tech")) {
-                    false
-                } else {
-                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, request.url)
-                    startActivity(intent)
-                    true
-                }
-            }
-        }
-
-        webView.webChromeClient = object : WebChromeClient() {
-            override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                progressBar.progress = newProgress
-                if (newProgress == 100) {
-                    progressBar.visibility = View.GONE
-                }
-            }
-
-            override fun onGeolocationPermissionsShowPrompt(
-                origin: String?,
-                callback: GeolocationPermissions.Callback?
-            ) {
-                if (ContextCompat.checkSelfPermission(this@MainActivity,
-                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    callback?.invoke(origin, true, false)
-                } else {
-                    ActivityCompat.requestPermissions(this@MainActivity,
-                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_REQUEST_CODE)
-                }
-            }
-        }
-
-        webView.addJavascriptInterface(WebAppInterface(this), "AndroidApp")
-    }
-
-    private fun setupSwipeRefresh() {
-        swipeRefresh.setColorSchemeColors(
-            ContextCompat.getColor(this, R.color.gold),
-            ContextCompat.getColor(this, R.color.green)
-        )
-        swipeRefresh.setOnRefreshListener {
-            webView.reload()
-        }
-    }
-
-    private fun setupBottomNav() {
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
+        loadFragment(SurahListFragment())
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_quran -> {
-                    loadUrl(BASE_URL)
-                    toolbarTitle.text = "القرآن الكريم"
-                    true
-                }
-                R.id.nav_prayer -> {
-                    webView.evaluateJavascript(
-                        "document.querySelector('[data-tab=\"prayer\"]')?.click();", null
-                    )
-                    toolbarTitle.text = "أوقات الصلاة"
-                    true
-                }
-                R.id.nav_qibla -> {
-                    webView.evaluateJavascript(
-                        "document.querySelector('[data-tab=\"qibla\"]')?.click();", null
-                    )
-                    toolbarTitle.text = "القبلة"
-                    true
-                }
-                R.id.nav_bookmarks -> {
-                    webView.evaluateJavascript(
-                        "document.querySelector('[data-tab=\"bookmarks\"]')?.click();", null
-                    )
-                    toolbarTitle.text = "المحفوظات"
-                    true
-                }
-                else -> false
+                R.id.nav_quran -> loadFragment(SurahListFragment())
+                R.id.nav_prayer -> loadFragment(PrayerFragment())
+                R.id.nav_qibla -> loadFragment(QiblaFragment())
+                R.id.nav_bookmarks -> loadFragment(BookmarksFragment())
             }
+            true
         }
     }
-
-    private fun setupOfflineRetry() {
-        offlineView.setOnClickListener {
-            if (isNetworkAvailable()) {
-                offlineView.visibility = View.GONE
-                webView.visibility = View.VISIBLE
-                loadUrl(BASE_URL)
-            } else {
-                Toast.makeText(this, "لا يوجد اتصال بالإنترنت", Toast.LENGTH_SHORT).show()
-            }
-        }
+    fun loadFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, fragment)
+            .commit()
     }
-
-    private fun loadUrl(url: String) {
-        webView.visibility = View.VISIBLE
-        offlineView.visibility = View.GONE
-        webView.loadUrl(url)
-    }
-
-    private fun showOfflineView() {
-        offlineView.visibility = View.VISIBLE
-        webView.visibility = View.GONE
-        progressBar.visibility = View.GONE
-        swipeRefresh.isRefreshing = false
-    }
-
-    private fun isNetworkAvailable(): Boolean {
-        val cm = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-        val network = cm.activeNetwork ?: return false
-        val capabilities = cm.getNetworkCapabilities(network) ?: return false
-        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-    }
-
-    override fun onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            super.onBackPressed()
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            webView.reload()
-        }
+    fun openReader(surahNumber: Int, page: Int) {
+        val fragment = ReaderFragment.newInstance(surahNumber, page)
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 }
-MAIN
+MAINKT
 
-# WebAppInterface.kt - JavaScript interface for native features
-cat > $PROJECT/app/src/main/java/$PKG_PATH/WebAppInterface.kt << 'WEBINTERFACE'
-package tech.meshari.quran
+# ========== Data classes ==========
+cat > $PROJECT/app/src/main/java/$PKG_PATH/data/Models.kt << 'MODELS'
+package tech.meshari.quran.data
+
+data class Surah(
+    val n: Int, val name: String, val ename: String,
+    val ayas: Int, val type: String, val page: Int
+)
+data class Reciter(val id: String, val name: String, val server: String)
+data class PrayerTimes(
+    val fajr: String, val sunrise: String, val dhuhr: String,
+    val asr: String, val maghrib: String, val isha: String
+)
+MODELS
+
+cat > $PROJECT/app/src/main/java/$PKG_PATH/data/QuranData.kt << 'QURANDATA'
+package tech.meshari.quran.data
+
+object QuranData {
+    val surahs = listOf(
+        Surah(1,"الفاتحة","Al-Faatiha",7,"Meccan",1),Surah(2,"البقرة","Al-Baqara",286,"Medinan",2),
+        Surah(3,"آل عمران","Aal-i-Imraan",200,"Medinan",50),Surah(4,"النساء","An-Nisaa",176,"Medinan",77),
+        Surah(5,"المائدة","Al-Maaida",120,"Medinan",106),Surah(6,"الأنعام","Al-An'aam",165,"Meccan",128),
+        Surah(7,"الأعراف","Al-A'raaf",206,"Meccan",151),Surah(8,"الأنفال","Al-Anfaal",75,"Medinan",177),
+        Surah(9,"التوبة","At-Tawba",129,"Medinan",187),Surah(10,"يونس","Yunus",109,"Meccan",208),
+        Surah(11,"هود","Hud",123,"Meccan",221),Surah(12,"يوسف","Yusuf",111,"Meccan",235),
+        Surah(13,"الرعد","Ar-Ra'd",43,"Medinan",249),Surah(14,"ابراهيم","Ibrahim",52,"Meccan",255),
+        Surah(15,"الحجر","Al-Hijr",99,"Meccan",262),Surah(16,"النحل","An-Nahl",128,"Meccan",267),
+        Surah(17,"الإسراء","Al-Israa",111,"Meccan",282),Surah(18,"الكهف","Al-Kahf",110,"Meccan",293),
+        Surah(19,"مريم","Maryam",98,"Meccan",305),Surah(20,"طه","Taa-Haa",135,"Meccan",312),
+        Surah(21,"الأنبياء","Al-Anbiyaa",112,"Meccan",322),Surah(22,"الحج","Al-Hajj",78,"Medinan",332),
+        Surah(23,"المؤمنون","Al-Muminoon",118,"Meccan",342),Surah(24,"النور","An-Noor",64,"Medinan",350),
+        Surah(25,"الفرقان","Al-Furqaan",77,"Meccan",359),Surah(26,"الشعراء","Ash-Shu'araa",227,"Meccan",367),
+        Surah(27,"النمل","An-Naml",93,"Meccan",377),Surah(28,"القصص","Al-Qasas",88,"Meccan",385),
+        Surah(29,"العنكبوت","Al-Ankaboot",69,"Meccan",396),Surah(30,"الروم","Ar-Room",60,"Meccan",404),
+        Surah(31,"لقمان","Luqman",34,"Meccan",411),Surah(32,"السجدة","As-Sajda",30,"Meccan",415),
+        Surah(33,"الأحزاب","Al-Ahzaab",73,"Medinan",418),Surah(34,"سبإ","Saba",54,"Meccan",428),
+        Surah(35,"فاطر","Faatir",45,"Meccan",434),Surah(36,"يس","Yaseen",83,"Meccan",440),
+        Surah(37,"الصافات","As-Saaffaat",182,"Meccan",446),Surah(38,"ص","Saad",88,"Meccan",453),
+        Surah(39,"الزمر","Az-Zumar",75,"Meccan",458),Surah(40,"غافر","Al-Ghaafir",85,"Meccan",467),
+        Surah(41,"فصلت","Fussilat",54,"Meccan",477),Surah(42,"الشورى","Ash-Shura",53,"Meccan",483),
+        Surah(43,"الزخرف","Az-Zukhruf",89,"Meccan",489),Surah(44,"الدخان","Ad-Dukhaan",59,"Meccan",496),
+        Surah(45,"الجاثية","Al-Jaathiya",37,"Meccan",499),Surah(46,"الأحقاف","Al-Ahqaf",35,"Meccan",502),
+        Surah(47,"محمد","Muhammad",38,"Medinan",507),Surah(48,"الفتح","Al-Fath",29,"Medinan",511),
+        Surah(49,"الحجرات","Al-Hujuraat",18,"Medinan",515),Surah(50,"ق","Qaaf",45,"Meccan",518),
+        Surah(51,"الذاريات","Adh-Dhaariyat",60,"Meccan",520),Surah(52,"الطور","At-Tur",49,"Meccan",523),
+        Surah(53,"النجم","An-Najm",62,"Meccan",526),Surah(54,"القمر","Al-Qamar",55,"Meccan",528),
+        Surah(55,"الرحمن","Ar-Rahmaan",78,"Medinan",531),Surah(56,"الواقعة","Al-Waaqia",96,"Meccan",534),
+        Surah(57,"الحديد","Al-Hadid",29,"Medinan",537),Surah(58,"المجادلة","Al-Mujaadila",22,"Medinan",542),
+        Surah(59,"الحشر","Al-Hashr",24,"Medinan",545),Surah(60,"الممتحنة","Al-Mumtahana",13,"Medinan",549),
+        Surah(61,"الصف","As-Saff",14,"Medinan",551),Surah(62,"الجمعة","Al-Jumu'a",11,"Medinan",553),
+        Surah(63,"المنافقون","Al-Munaafiqoon",11,"Medinan",554),Surah(64,"التغابن","At-Taghaabun",18,"Medinan",556),
+        Surah(65,"الطلاق","At-Talaaq",12,"Medinan",558),Surah(66,"التحريم","At-Tahrim",12,"Medinan",560),
+        Surah(67,"الملك","Al-Mulk",30,"Meccan",562),Surah(68,"القلم","Al-Qalam",52,"Meccan",564),
+        Surah(69,"الحاقة","Al-Haaqqa",52,"Meccan",566),Surah(70,"المعارج","Al-Ma'aarij",44,"Meccan",568),
+        Surah(71,"نوح","Nooh",28,"Meccan",570),Surah(72,"الجن","Al-Jinn",28,"Meccan",572),
+        Surah(73,"المزمل","Al-Muzzammil",20,"Meccan",574),Surah(74,"المدثر","Al-Muddaththir",56,"Meccan",575),
+        Surah(75,"القيامة","Al-Qiyaama",40,"Meccan",577),Surah(76,"الانسان","Al-Insaan",31,"Medinan",578),
+        Surah(77,"المرسلات","Al-Mursalaat",50,"Meccan",580),Surah(78,"النبإ","An-Naba",40,"Meccan",582),
+        Surah(79,"النازعات","An-Naazi'aat",46,"Meccan",583),Surah(80,"عبس","Abasa",42,"Meccan",585),
+        Surah(81,"التكوير","At-Takwir",29,"Meccan",586),Surah(82,"الإنفطار","Al-Infitaar",19,"Meccan",587),
+        Surah(83,"المطففين","Al-Mutaffifin",36,"Meccan",587),Surah(84,"الإنشقاق","Al-Inshiqaaq",25,"Meccan",589),
+        Surah(85,"البروج","Al-Burooj",22,"Meccan",590),Surah(86,"الطارق","At-Taariq",17,"Meccan",591),
+        Surah(87,"الأعلى","Al-A'laa",19,"Meccan",591),Surah(88,"الغاشية","Al-Ghaashiya",26,"Meccan",592),
+        Surah(89,"الفجر","Al-Fajr",30,"Meccan",593),Surah(90,"البلد","Al-Balad",20,"Meccan",594),
+        Surah(91,"الشمس","Ash-Shams",15,"Meccan",595),Surah(92,"الليل","Al-Lail",21,"Meccan",595),
+        Surah(93,"الضحى","Ad-Dhuhaa",11,"Meccan",596),Surah(94,"الشرح","Ash-Sharh",8,"Meccan",596),
+        Surah(95,"التين","At-Tin",8,"Meccan",597),Surah(96,"العلق","Al-Alaq",19,"Meccan",597),
+        Surah(97,"القدر","Al-Qadr",5,"Meccan",598),Surah(98,"البينة","Al-Bayyina",8,"Medinan",598),
+        Surah(99,"الزلزلة","Az-Zalzala",8,"Medinan",599),Surah(100,"العاديات","Al-Aadiyaat",11,"Meccan",599),
+        Surah(101,"القارعة","Al-Qaari'a",11,"Meccan",600),Surah(102,"التكاثر","At-Takaathur",8,"Meccan",600),
+        Surah(103,"العصر","Al-Asr",3,"Meccan",601),Surah(104,"الهمزة","Al-Humaza",9,"Meccan",601),
+        Surah(105,"الفيل","Al-Fil",5,"Meccan",601),Surah(106,"قريش","Quraish",4,"Meccan",602),
+        Surah(107,"الماعون","Al-Maa'un",7,"Meccan",602),Surah(108,"الكوثر","Al-Kawthar",3,"Meccan",602),
+        Surah(109,"الكافرون","Al-Kaafiroon",6,"Meccan",603),Surah(110,"النصر","An-Nasr",3,"Medinan",603),
+        Surah(111,"المسد","Al-Masad",5,"Meccan",603),Surah(112,"الإخلاص","Al-Ikhlaas",4,"Meccan",604),
+        Surah(113,"الفلق","Al-Falaq",5,"Meccan",604),Surah(114,"الناس","An-Naas",6,"Meccan",604)
+    )
+
+    val reciters = listOf(
+        Reciter("102","ماهر المعيقلي","https://server12.mp3quran.net/maher/"),
+        Reciter("110","مشاري العفاسي","https://server8.mp3quran.net/afs/"),
+        Reciter("120","إدريس أبكر","https://server6.mp3quran.net/abkr/"),
+        Reciter("106","محمد أيوب","https://server8.mp3quran.net/ayyub/"),
+        Reciter("112","محمد جبريل","https://server8.mp3quran.net/jbrl/"),
+        Reciter("100","محمود خليل الحصري","https://server13.mp3quran.net/husr/"),
+        Reciter("134","محمد اللحيدان","https://server8.mp3quran.net/lhdan/"),
+        Reciter("135","إبراهيم الأخضر","https://server6.mp3quran.net/akdr/"),
+        Reciter("136","محمود علي البنا","https://server8.mp3quran.net/bna/"),
+        Reciter("109","محمد المحيسني","https://server11.mp3quran.net/mhsny/"),
+        Reciter("140","ياسر الدوسري","https://server11.mp3quran.net/yasser/"),
+        Reciter("114","أحمد العجمي","https://server10.mp3quran.net/ajm/"),
+        Reciter("108","عبدالرحمن السديس","https://server11.mp3quran.net/sds/"),
+        Reciter("113","سعود الشريم","https://server7.mp3quran.net/shuraim/"),
+        Reciter("105","محمد صديق المنشاوي","https://server10.mp3quran.net/minsh/"),
+        Reciter("101","عبدالباسط عبدالصمد","https://server7.mp3quran.net/basit/")
+    )
+
+    fun getPageImageUrl(page: Int): String {
+        return "https://surahquran.com/img/pages-quran/page" + page.toString().padStart(3, '0') + ".png"
+    }
+
+    fun getAudioUrl(reciter: Reciter, surahNumber: Int): String {
+        return reciter.server + surahNumber.toString().padStart(3, '0') + ".mp3"
+    }
+
+    fun getSurahByPage(page: Int): Surah {
+        return surahs.lastOrNull { it.page <= page } ?: surahs[0]
+    }
+}
+QURANDATA
+
+# ========== SurahListFragment.kt ==========
+cat > $PROJECT/app/src/main/java/$PKG_PATH/ui/SurahListFragment.kt << 'SURAHLISTFRAG'
+package tech.meshari.quran.ui
+
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.EditText
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
+import tech.meshari.quran.MainActivity
+import tech.meshari.quran.R
+import tech.meshari.quran.data.QuranData
+import tech.meshari.quran.data.Surah
+
+class SurahListFragment : Fragment() {
+    private var currentFilter = "all"
+    private var searchQuery = ""
+    private lateinit var adapter: SurahAdapter
+
+    override fun onCreateView(inflater: LayoutInflater, c: ViewGroup?, s: Bundle?): View {
+        val view = inflater.inflate(R.layout.fragment_surah_list, c, false)
+        val recycler = view.findViewById<RecyclerView>(R.id.surahRecycler)
+        val search = view.findViewById<EditText>(R.id.searchEdit)
+        val btnAll = view.findViewById<MaterialButton>(R.id.btnAll)
+        val btnMeccan = view.findViewById<MaterialButton>(R.id.btnMeccan)
+        val btnMedinan = view.findViewById<MaterialButton>(R.id.btnMedinan)
+
+        adapter = SurahAdapter { surah ->
+            (activity as? MainActivity)?.openReader(surah.n, surah.page)
+        }
+        recycler.layoutManager = GridLayoutManager(requireContext(), 2)
+        recycler.adapter = adapter
+        updateList()
+
+        search.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
+            override fun onTextChanged(s: CharSequence?, st: Int, b: Int, c: Int) {}
+            override fun afterTextChanged(s: Editable?) { searchQuery = s.toString(); updateList() }
+        })
+
+        btnAll.setOnClickListener { currentFilter = "all"; updateButtons(btnAll, btnMeccan, btnMedinan); updateList() }
+        btnMeccan.setOnClickListener { currentFilter = "Meccan"; updateButtons(btnMeccan, btnAll, btnMedinan); updateList() }
+        btnMedinan.setOnClickListener { currentFilter = "Medinan"; updateButtons(btnMedinan, btnAll, btnMeccan); updateList() }
+        return view
+    }
+
+    private fun updateButtons(active: MaterialButton, vararg others: MaterialButton) {
+        active.setBackgroundColor(resources.getColor(R.color.gold, null))
+        others.forEach { it.setBackgroundColor(resources.getColor(R.color.bg_card, null)) }
+    }
+
+    private fun updateList() {
+        var list = QuranData.surahs
+        if (currentFilter != "all") list = list.filter { it.type == currentFilter }
+        if (searchQuery.isNotEmpty()) list = list.filter {
+            it.name.contains(searchQuery) || it.ename.contains(searchQuery, true) || it.n.toString() == searchQuery
+        }
+        adapter.submitList(list)
+    }
+}
+SURAHLISTFRAG
+
+# ========== SurahAdapter.kt ==========
+cat > $PROJECT/app/src/main/java/$PKG_PATH/ui/SurahAdapter.kt << 'SURAHADAPTER'
+package tech.meshari.quran.ui
+
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import tech.meshari.quran.R
+import tech.meshari.quran.data.Surah
+
+class SurahAdapter(private val onClick: (Surah) -> Unit) :
+    ListAdapter<Surah, SurahAdapter.VH>(object : DiffUtil.ItemCallback<Surah>() {
+        override fun areItemsTheSame(a: Surah, b: Surah) = a.n == b.n
+        override fun areContentsTheSame(a: Surah, b: Surah) = a == b
+    }) {
+    inner class VH(v: View) : RecyclerView.ViewHolder(v) {
+        val number: TextView = v.findViewById(R.id.surahNumber)
+        val nameAr: TextView = v.findViewById(R.id.surahNameAr)
+        val nameEn: TextView = v.findViewById(R.id.surahNameEn)
+        val type: TextView = v.findViewById(R.id.surahType)
+        val ayahs: TextView = v.findViewById(R.id.surahAyahs)
+    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+        VH(LayoutInflater.from(parent.context).inflate(R.layout.item_surah, parent, false))
+
+    override fun onBindViewHolder(holder: VH, position: Int) {
+        val s = getItem(position)
+        holder.number.text = s.n.toString()
+        holder.nameAr.text = s.name
+        holder.nameEn.text = s.ename
+        holder.type.text = if (s.type == "Meccan") "مكية" else "مدنية"
+        holder.ayahs.text = "${s.ayas} آية"
+        holder.itemView.setOnClickListener { onClick(s) }
+    }
+}
+SURAHADAPTER
+
+# ========== ReaderFragment.kt ==========
+cat > $PROJECT/app/src/main/java/$PKG_PATH/ui/ReaderFragment.kt << 'READERFRAG'
+package tech.meshari.quran.ui
+
+import android.media.MediaPlayer
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.*
+import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
+import tech.meshari.quran.R
+import tech.meshari.quran.data.QuranData
+
+class ReaderFragment : Fragment() {
+    private var currentPage = 1
+    private var mediaPlayer: MediaPlayer? = null
+    private var isPlaying = false
+    private var selectedReciterIndex = 0
+
+    companion object {
+        fun newInstance(surahNum: Int, page: Int) = ReaderFragment().apply {
+            arguments = Bundle().apply { putInt("surah", surahNum); putInt("page", page) }
+        }
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, c: ViewGroup?, s: Bundle?): View {
+        val view = inflater.inflate(R.layout.fragment_reader, c, false)
+        currentPage = arguments?.getInt("page", 1) ?: 1
+        val pageImage = view.findViewById<ImageView>(R.id.quranPageImage)
+        val pageLoading = view.findViewById<ProgressBar>(R.id.pageLoading)
+        val title = view.findViewById<TextView>(R.id.surahTitle)
+        val pageInfo = view.findViewById<TextView>(R.id.pageInfo)
+        val btnPrev = view.findViewById<ImageView>(R.id.btnPrev)
+        val btnNext = view.findViewById<ImageView>(R.id.btnNext)
+        val btnPlay = view.findViewById<ImageView>(R.id.btnPlay)
+        val btnBack = view.findViewById<ImageView>(R.id.btnBack)
+        val spinner = view.findViewById<Spinner>(R.id.reciterSpinner)
+
+        val reciterNames = QuranData.reciters.map { it.name }
+        spinner.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, reciterNames)
+        spinner.setSelection(0)
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) { selectedReciterIndex = pos }
+            override fun onNothingSelected(p: AdapterView<*>?) {}
+        }
+
+        fun loadPage() {
+            val surah = QuranData.getSurahByPage(currentPage)
+            title.text = "سورة ${surah.name}"
+            pageInfo.text = "$currentPage / 604"
+            pageLoading.visibility = View.VISIBLE
+            Glide.with(this).load(QuranData.getPageImageUrl(currentPage))
+                .into(object : com.bumptech.glide.request.target.CustomTarget<android.graphics.drawable.Drawable>() {
+                    override fun onResourceReady(r: android.graphics.drawable.Drawable, t: com.bumptech.glide.request.transition.Transition<in android.graphics.drawable.Drawable>?) {
+                        pageImage.setImageDrawable(r); pageLoading.visibility = View.GONE
+                    }
+                    override fun onLoadCleared(p: android.graphics.drawable.Drawable?) {}
+                    override fun onLoadFailed(e: android.graphics.drawable.Drawable?) { pageLoading.visibility = View.GONE }
+                })
+        }
+        loadPage()
+
+        btnPrev.setOnClickListener { if (currentPage > 1) { currentPage--; loadPage() } }
+        btnNext.setOnClickListener { if (currentPage < 604) { currentPage++; loadPage() } }
+        btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
+
+        btnPlay.setOnClickListener {
+            if (isPlaying) {
+                mediaPlayer?.stop(); mediaPlayer?.release(); mediaPlayer = null
+                isPlaying = false; btnPlay.setImageResource(android.R.drawable.ic_media_play)
+            } else {
+                val surah = QuranData.getSurahByPage(currentPage)
+                val reciter = QuranData.reciters[selectedReciterIndex]
+                val url = QuranData.getAudioUrl(reciter, surah.n)
+                mediaPlayer = MediaPlayer().apply {
+                    setDataSource(url); prepareAsync()
+                    setOnPreparedListener { start(); isPlaying = true; btnPlay.setImageResource(android.R.drawable.ic_media_pause) }
+                    setOnCompletionListener { isPlaying = false; btnPlay.setImageResource(android.R.drawable.ic_media_play) }
+                    setOnErrorListener { _, _, _ -> isPlaying = false; btnPlay.setImageResource(android.R.drawable.ic_media_play); true }
+                }
+            }
+        }
+
+        view.findViewById<ImageView>(R.id.btnTafsir).setOnClickListener {
+            val surah = QuranData.getSurahByPage(currentPage)
+            val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext())
+            val tv = TextView(requireContext()).apply {
+                text = "جاري تحميل تفسير سورة ${surah.name}..."
+                textSize = 16f; setPadding(32,32,32,32)
+                setTextColor(resources.getColor(R.color.text_primary, null))
+            }
+            dialog.setContentView(tv); dialog.show()
+            Thread {
+                try {
+                    val url = java.net.URL("https://api.alquran.cloud/v1/surah/${surah.n}/ar.muyassar")
+                    val conn = url.openConnection() as java.net.HttpURLConnection
+                    val json = conn.inputStream.bufferedReader().readText()
+                    val obj = com.google.gson.JsonParser.parseString(json).asJsonObject
+                    val ayahs = obj.getAsJsonObject("data").getAsJsonArray("ayahs")
+                    val sb = StringBuilder()
+                    for (i in 0 until ayahs.size()) {
+                        val a = ayahs[i].asJsonObject
+                        sb.append("﴿${a.get("numberInSurah").asInt}﴾ ${a.get("text").asString}\n\n")
+                    }
+                    activity?.runOnUiThread { tv.text = sb.toString() }
+                } catch (e: Exception) {
+                    activity?.runOnUiThread { tv.text = "خطأ في تحميل التفسير" }
+                }
+            }.start()
+        }
+        return view
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mediaPlayer?.release(); mediaPlayer = null
+    }
+}
+READERFRAG
+
+# ========== PrayerFragment.kt ==========
+cat > $PROJECT/app/src/main/java/$PKG_PATH/ui/PrayerFragment.kt << 'PRAYERFRAG'
+package tech.meshari.quran.ui
+
+import android.Manifest
+import android.content.pm.PackageManager
+import android.location.LocationManager
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.*
+import androidx.core.app.ActivityCompat
+import androidx.fragment.app.Fragment
+import tech.meshari.quran.R
+import com.google.gson.JsonParser
+
+class PrayerFragment : Fragment() {
+    override fun onCreateView(inflater: LayoutInflater, c: ViewGroup?, s: Bundle?): View {
+        val view = inflater.inflate(R.layout.fragment_prayer, c, false)
+        val loading = view.findViewById<ProgressBar>(R.id.prayerLoading)
+        val container = view.findViewById<LinearLayout>(R.id.prayerContainer)
+        val cityName = view.findViewById<TextView>(R.id.cityName)
+        val hijriDate = view.findViewById<TextView>(R.id.hijriDate)
+
+        fun loadPrayer(lat: Double, lon: Double) {
+            Thread {
+                try {
+                    val url = java.net.URL("https://api.aladhan.com/v1/timings?latitude=$lat&longitude=$lon&method=4")
+                    val json = url.openConnection().getInputStream().bufferedReader().readText()
+                    val data = JsonParser.parseString(json).asJsonObject.getAsJsonObject("data")
+                    val timings = data.getAsJsonObject("timings")
+                    val date = data.getAsJsonObject("date")
+                    val hijri = date.getAsJsonObject("hijri")
+
+                    val prayers = listOf(
+                        "🌙" to "الفجر" to timings.get("Fajr").asString,
+                        "🌅" to "الشروق" to timings.get("Sunrise").asString,
+                        "☀️" to "الظهر" to timings.get("Dhuhr").asString,
+                        "🌤" to "العصر" to timings.get("Asr").asString,
+                        "🌇" to "المغرب" to timings.get("Maghrib").asString,
+                        "🌙" to "العشاء" to timings.get("Isha").asString
+                    )
+                    activity?.runOnUiThread {
+                        loading.visibility = View.GONE
+                        container.visibility = View.VISIBLE
+                        cityName.text = "📍 موقعك الحالي"
+                        hijriDate.text = "${hijri.get("day").asString} ${hijri.getAsJsonObject("month").get("ar").asString} ${hijri.get("year").asString} هـ"
+                        container.removeAllViews()
+                        prayers.forEach { (iconName, time) ->
+                            val (icon, name) = iconName
+                            val card = LinearLayout(requireContext()).apply {
+                                orientation = LinearLayout.HORIZONTAL
+                                setPadding(24,20,24,20)
+                                background = resources.getDrawable(R.drawable.prayer_card_bg, null)
+                                val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                                lp.bottomMargin = 12
+                                layoutParams = lp
+                            }
+                            val iconTv = TextView(requireContext()).apply {
+                                text = icon; textSize = 24f
+                            }
+                            val nameTv = TextView(requireContext()).apply {
+                                text = name; textSize = 18f
+                                setTextColor(resources.getColor(R.color.text_primary, null))
+                                setPadding(16,0,0,0)
+                                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                            }
+                            val timeTv = TextView(requireContext()).apply {
+                                text = time; textSize = 20f; setTypeface(null, android.graphics.Typeface.BOLD)
+                                setTextColor(resources.getColor(R.color.gold, null))
+                            }
+                            card.addView(iconTv); card.addView(nameTv); card.addView(timeTv)
+                            container.addView(card)
+                        }
+                    }
+                } catch (e: Exception) {
+                    activity?.runOnUiThread {
+                        loading.visibility = View.GONE
+                        cityName.text = "خطأ في تحميل أوقات الصلاة"
+                    }
+                }
+            }.start()
+        }
+
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            val lm = requireContext().getSystemService(android.content.Context.LOCATION_SERVICE) as LocationManager
+            val loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) ?: lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            if (loc != null) loadPrayer(loc.latitude, loc.longitude)
+            else loadPrayer(24.7136, 46.6753) // Riyadh default
+        } else {
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 100)
+            loadPrayer(24.7136, 46.6753)
+        }
+        return view
+    }
+}
+PRAYERFRAG
+
+# ========== QiblaFragment.kt ==========
+cat > $PROJECT/app/src/main/java/$PKG_PATH/ui/QiblaFragment.kt << 'QIBLAFRAG'
+package tech.meshari.quran.ui
 
 import android.content.Context
-import android.webkit.JavascriptInterface
-import android.widget.Toast
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.fragment.app.Fragment
+import tech.meshari.quran.R
 
-class WebAppInterface(private val context: Context) {
-    @JavascriptInterface
-    fun showToast(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+class QiblaFragment : Fragment(), SensorEventListener {
+    private var sensorManager: SensorManager? = null
+    private var qiblaDirection: TextView? = null
+    private var qiblaDegrees: TextView? = null
+    private val qiblaAngle = 245.0 // approximate for Saudi Arabia
+
+    override fun onCreateView(inflater: LayoutInflater, c: ViewGroup?, s: Bundle?): View {
+        val view = inflater.inflate(R.layout.fragment_qibla, c, false)
+        qiblaDirection = view.findViewById(R.id.qiblaDirection)
+        qiblaDegrees = view.findViewById(R.id.qiblaDegrees)
+        sensorManager = requireContext().getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        return view
     }
 
-    @JavascriptInterface
-    fun getAppVersion(): String {
-        return "2.0.0"
+    override fun onResume() {
+        super.onResume()
+        sensorManager?.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)?.let {
+            sensorManager?.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
+        }
     }
 
-    @JavascriptInterface
-    fun isNativeApp(): Boolean {
-        return true
+    override fun onPause() {
+        super.onPause()
+        sensorManager?.unregisterListener(this)
+    }
+
+    override fun onSensorChanged(event: SensorEvent) {
+        if (event.sensor.type == Sensor.TYPE_ROTATION_VECTOR) {
+            val rotMatrix = FloatArray(9)
+            val orientation = FloatArray(3)
+            SensorManager.getRotationMatrixFromVector(rotMatrix, event.values)
+            SensorManager.getOrientation(rotMatrix, orientation)
+            val azimuth = Math.toDegrees(orientation[0].toDouble())
+            val bearing = (qiblaAngle - azimuth + 360) % 360
+            qiblaDirection?.rotation = bearing.toFloat()
+            qiblaDegrees?.text = String.format("%.0f°", bearing)
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+}
+QIBLAFRAG
+
+# ========== BookmarksFragment.kt ==========
+cat > $PROJECT/app/src/main/java/$PKG_PATH/ui/BookmarksFragment.kt << 'BOOKMARKSFRAG'
+package tech.meshari.quran.ui
+
+import android.content.Context
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import tech.meshari.quran.MainActivity
+import tech.meshari.quran.R
+import tech.meshari.quran.data.QuranData
+
+class BookmarksFragment : Fragment() {
+    override fun onCreateView(inflater: LayoutInflater, c: ViewGroup?, s: Bundle?): View {
+        val view = inflater.inflate(R.layout.fragment_bookmarks, c, false)
+        val recycler = view.findViewById<RecyclerView>(R.id.bookmarksRecycler)
+        val empty = view.findViewById<TextView>(R.id.emptyBookmarks)
+        val prefs = requireContext().getSharedPreferences("quran_prefs", Context.MODE_PRIVATE)
+        val bookmarksStr = prefs.getString("bookmarks", "") ?: ""
+        val bookmarks = if (bookmarksStr.isNotEmpty()) bookmarksStr.split(",").mapNotNull { it.toIntOrNull() } else emptyList()
+
+        if (bookmarks.isEmpty()) {
+            empty.visibility = View.VISIBLE
+            recycler.visibility = View.GONE
+        } else {
+            recycler.layoutManager = LinearLayoutManager(requireContext())
+            recycler.adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+                override fun getItemCount() = bookmarks.size
+                override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+                    val tv = TextView(parent.context).apply {
+                        textSize = 18f; setPadding(24,20,24,20)
+                        setTextColor(resources.getColor(R.color.text_primary, null))
+                        setBackgroundResource(R.drawable.prayer_card_bg)
+                        val lp = RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT)
+                        lp.bottomMargin = 8; layoutParams = lp
+                    }
+                    return object : RecyclerView.ViewHolder(tv) {}
+                }
+                override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+                    val page = bookmarks[position]
+                    val surah = QuranData.getSurahByPage(page)
+                    (holder.itemView as TextView).text = "📖 صفحة $page - سورة ${surah.name}"
+                    holder.itemView.setOnClickListener {
+                        (activity as? MainActivity)?.openReader(surah.n, page)
+                    }
+                }
+            }
+        }
+        return view
     }
 }
-WEBINTERFACE
+BOOKMARKSFRAG
 
-# activity_splash.xml - Splash screen layout with logo
-cat > $PROJECT/app/src/main/res/layout/activity_splash.xml << 'SPLASHLAYOUT'
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/splash_bg">
+# ========== proguard-rules.pro ==========
+cat > $PROJECT/app/proguard-rules.pro << 'PROGUARD'
+-keep class tech.meshari.quran.data.** { *; }
+-keep class com.google.gson.** { *; }
+-dontwarn okhttp3.**
+-dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+PROGUARD
 
-    <ImageView
-        android:id="@+id/splashLogo"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:src="@drawable/splash_logo"
-        android:scaleType="fitCenter"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/splashTitle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_chainStyle="packed"
-        android:contentDescription="شعار القرآن الكريم" />
+# ========== gradle.properties ==========
+cat > $PROJECT/gradle.properties << 'GRADLEPROPS'
+android.useAndroidX=true
+org.gradle.jvmargs=-Xmx2048m
+GRADLEPROPS
 
-    <TextView
-        android:id="@+id/splashTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="القرآن الكريم"
-        android:textSize="28sp"
-        android:textColor="@color/gold"
-        android:textStyle="bold"
-        android:fontFamily="serif"
-        android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@id/splashLogo"
-        app:layout_constraintBottom_toTopOf="@id/splashSubtitle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <TextView
-        android:id="@+id/splashSubtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="للاستماع والتلاوة"
-        android:textSize="16sp"
-        android:textColor="@color/text_secondary"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/splashTitle"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <ProgressBar
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginBottom="48dp"
-        android:indeterminateTint="@color/gold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
-SPLASHLAYOUT
-
-# activity_main.xml - Main layout with toolbar, webview, bottom nav
-cat > $PROJECT/app/src/main/res/layout/activity_main.xml << 'MAINLAYOUT'
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/background">
-
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
-        android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:background="@color/toolbar_bg"
-        android:elevation="4dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical|end"
-            android:orientation="horizontal"
-            android:layoutDirection="rtl"
-            android:paddingEnd="8dp"
-            android:paddingStart="8dp">
-
-            <ImageView
-                android:id="@+id/toolbarLogo"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:src="@mipmap/ic_launcher"
-                android:scaleType="fitCenter"
-                android:layout_marginEnd="12dp"
-                android:contentDescription="شعار التطبيق" />
-
-            <TextView
-                android:id="@+id/toolbarTitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="القرآن الكريم"
-                android:textSize="18sp"
-                android:textColor="@color/gold"
-                android:textStyle="bold"
-                android:fontFamily="serif" />
-
-        </LinearLayout>
-
-    </com.google.android.material.appbar.MaterialToolbar>
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="@android:style/Widget.ProgressBar.Horizontal"
-        android:layout_width="0dp"
-        android:layout_height="3dp"
-        android:max="100"
-        android:progressTint="@color/gold"
-        android:progressBackgroundTint="@android:color/transparent"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefresh"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/progressBar"
-        app:layout_constraintBottom_toTopOf="@id/bottomNav"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <WebView
-            android:id="@+id/webView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-    <!-- Offline View -->
-    <LinearLayout
-        android:id="@+id/offlineView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:background="@color/background"
-        android:visibility="gone"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintBottom_toTopOf="@id/bottomNav"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@drawable/splash_logo"
-            android:alpha="0.5"
-            android:contentDescription="غير متصل" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="لا يوجد اتصال بالإنترنت"
-            android:textSize="18sp"
-            android:textColor="@color/gold"
-            android:layout_marginTop="24dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="اضغط هنا لإعادة المحاولة"
-            android:textSize="14sp"
-            android:textColor="@color/text_secondary"
-            android:layout_marginTop="8dp" />
-
-    </LinearLayout>
-
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNav"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@color/toolbar_bg"
-        app:itemIconTint="@color/bottom_nav_color"
-        app:itemTextColor="@color/bottom_nav_color"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/bottom_nav_menu"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
-MAINLAYOUT
-
-# Bottom navigation menu
-mkdir -p $PROJECT/app/src/main/res/menu
-cat > $PROJECT/app/src/main/res/menu/bottom_nav_menu.xml << 'MENU'
-<?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/nav_quran"
-        android:icon="@android:drawable/ic_menu_edit"
-        android:title="القرآن" />
-    <item
-        android:id="@+id/nav_prayer"
-        android:icon="@android:drawable/ic_menu_recent_history"
-        android:title="الصلاة" />
-    <item
-        android:id="@+id/nav_qibla"
-        android:icon="@android:drawable/ic_menu_compass"
-        android:title="القبلة" />
-    <item
-        android:id="@+id/nav_bookmarks"
-        android:icon="@android:drawable/ic_menu_save"
-        android:title="المحفوظات" />
-</menu>
-MENU
-
-# Bottom nav color selector
-mkdir -p $PROJECT/app/src/main/res/color
-cat > $PROJECT/app/src/main/res/color/bottom_nav_color.xml << 'NAVCOLOR'
-<?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="#c8a84e" android:state_checked="true" />
-    <item android:color="#80c8a84e" />
-</selector>
-NAVCOLOR
-
-# colors.xml
-cat > $PROJECT/app/src/main/res/values/colors.xml << 'COLORS'
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="background">#0a1628</color>
-    <color name="toolbar_bg">#0f1f3a</color>
-    <color name="splash_bg">#0a1628</color>
-    <color name="gold">#c8a84e</color>
-    <color name="green">#1a5c2e</color>
-    <color name="card_bg">#16213e</color>
-    <color name="text_primary">#f0e6d3</color>
-    <color name="text_secondary">#a0b0c0</color>
-    <color name="accent">#e2c275</color>
-    <color name="status_bar">#060e1c</color>
-</resources>
-COLORS
-
-# themes.xml
-cat > $PROJECT/app/src/main/res/values/themes.xml << 'THEMES'
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Theme.QuranApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/gold</item>
-        <item name="colorPrimaryDark">@color/status_bar</item>
-        <item name="colorAccent">@color/accent</item>
-        <item name="android:windowBackground">@color/background</item>
-        <item name="android:statusBarColor">@color/status_bar</item>
-        <item name="android:navigationBarColor">@color/toolbar_bg</item>
-        <item name="android:windowLightStatusBar">false</item>
-    </style>
-
-    <style name="Theme.QuranApp.Splash" parent="Theme.QuranApp">
-        <item name="android:windowBackground">@color/splash_bg</item>
-    </style>
-</resources>
-THEMES
-
-# Night theme
-cat > $PROJECT/app/src/main/res/values-night/themes.xml << 'NIGHTTHEME'
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Theme.QuranApp" parent="Theme.Material3.Dark.NoActionBar">
-        <item name="colorPrimary">@color/gold</item>
-        <item name="colorPrimaryDark">@color/status_bar</item>
-        <item name="colorAccent">@color/accent</item>
-        <item name="android:windowBackground">@color/background</item>
-        <item name="android:statusBarColor">@color/status_bar</item>
-        <item name="android:navigationBarColor">@color/toolbar_bg</item>
-        <item name="android:windowLightStatusBar">false</item>
-    </style>
-
-    <style name="Theme.QuranApp.Splash" parent="Theme.QuranApp">
-        <item name="android:windowBackground">@color/splash_bg</item>
-    </style>
-</resources>
-NIGHTTHEME
-
-# strings.xml
-cat > $PROJECT/app/src/main/res/values/strings.xml << 'STRINGS'
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">القرآن الكريم</string>
-</resources>
-STRINGS
-
-echo "✅ Native Quran Android project created successfully!"
+echo "✅ Native Quran Android app v3.0.0 created!"
 echo "📱 Package: tech.meshari.quran"
-echo "🎨 Icon: logoo.png from quran.meshari.tech"
-echo "🚀 Version: 2.0.0 (versionCode 3)"
+echo "🎨 Design: Material Design 3 - Dark Islamic theme"
+echo "🔌 APIs: alquran.cloud + aladhan.com + mp3quran.net"
+echo "🖼️ Quran pages: surahquran.com"
+echo "🎵 16 reciters with audio streaming"
+echo "🕌 Prayer times with location"
+echo "🧭 Qibla compass with sensors"
+echo "📌 Bookmarks with SharedPreferences"
+echo "🚀 Version: 3.0.0 (versionCode 4)"
