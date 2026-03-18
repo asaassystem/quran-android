@@ -39,7 +39,7 @@ jobs:
       - name: Sign APK
         run: |
           cd quran-app
-          keytool -genkey -v -keystore release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias quranapp -storepass quranapp123 -keypass quranapp123 -dname "CN=Meshari, OU=QuranApp, O=Meshari Tech, L=Riyadh, ST=Riyadh, C=SA"
+          keytool -genkey -v -keystore release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias quranapp -storepass quranapp123 -keypass quranapp123 -dname "CN=Quran App,O=Meshari,C=SA"
           ${ANDROID_HOME}/build-tools/34.0.0/apksigner sign --ks release-key.jks --ks-pass pass:quranapp123 --key-pass pass:quranapp123 --out quran-signed.apk app/build/outputs/apk/release/app-release-unsigned.apk
 
       - name: Upload APK
@@ -51,8 +51,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v2.0.0
-          name: "القرآن الكريم v2.0.0"
+          tag_name: v3.0.0
+          name: "القرآن الكريم v3.0.0"
           files: quran-app/quran-signed.apk
           generate_release_notes: true
         env:
