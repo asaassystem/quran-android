@@ -208,6 +208,7 @@ cat > $PROJECT/app/src/main/res/values/strings.xml << 'STRINGS'
     <string name="tab_prayer">الصلاة</string>
     <string name="tab_qibla">القبلة</string>
     <string name="tab_bookmarks">المحفوظات</string>
+    <string name="tab_about">حول</string>
     <string name="search_hint">ابحث في القرآن...</string>
     <string name="no_internet">لا يوجد اتصال بالإنترنت</string>
     <string name="loading">جاري التحميل...</string>
@@ -237,6 +238,7 @@ cat > $PROJECT/app/src/main/res/menu/bottom_nav.xml << 'MENU'
     <item android:id="@+id/nav_prayer" android:icon="@android:drawable/ic_menu_my_calendar" android:title="@string/tab_prayer"/>
     <item android:id="@+id/nav_qibla" android:icon="@android:drawable/ic_menu_compass" android:title="@string/tab_qibla"/>
     <item android:id="@+id/nav_bookmarks" android:icon="@android:drawable/ic_menu_save" android:title="@string/tab_bookmarks"/>
+    <item android:id="@+id/nav_about" android:icon="@android:drawable/ic_menu_info_details" android:title="@string/tab_about"/>
 </menu>
 MENU
 
