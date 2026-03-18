@@ -74,7 +74,7 @@ android {
         applicationId = "tech.meshari.quran"
         minSdk = 24
         targetSdk = 34
-        versionCode = 5
+        versionCode = 4
         versionName = "4.0.0"
     }
     buildFeatures { viewBinding = true }
@@ -138,9 +138,10 @@ cat > $PROJECT/app/src/main/AndroidManifest.xml << 'MANIFEST'
         <activity android:name=".MainActivity" android:screenOrientation="portrait"/>
         <activity
             android:name=".AboutActivity"
-            android:label="\u062D\u0648\u0644 \u0627\u0644\u062A\u0637\u0628\u064A\u0642"
-            android:theme="@style/Theme.QuranApp" />
-            </application>
+            android:label="حول التطبيق"
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait" />
+    </application>
 </manifest>
 MANIFEST
 
@@ -225,14 +226,6 @@ cat > $PROJECT/app/src/main/res/values/strings.xml << 'STRINGS'
     <string name="asr">العصر</string>
     <string name="maghrib">المغرب</string>
     <string name="isha">العشاء</string>
-    <string name="about_app">\u062D\u0648\u0644 \u0627\u0644\u062A\u0637\u0628\u064A\u0642</string>
-    <string name="about_title">\u062A\u0637\u0628\u064A\u0642 \u0627\u0644\u0642\u0631\u0622\u0646 \u0627\u0644\u0643\u0631\u064A\u0645</string>
-    <string name="about_version">\u0627\u0644\u0625\u0635\u062F\u0627\u0631 4.0.0</string>
-    <string name="about_date">\u062A\u0627\u0631\u064A\u062E \u0627\u0644\u0646\u0634\u0631: 2026/03/18</string>
-    <string name="about_sadaqa">\u0635\u062F\u0642\u0629 \u062C\u0627\u0631\u064A\u0629 \u0639\u0646\u064A \u0648\u0639\u0646 \u0648\u0627\u0644\u062F\u064A \u0648\u0639\u0646 \u0627\u0644\u0645\u0633\u0644\u0645\u064A\u0646 \u062C\u0645\u064A\u0639\u0627\u064B</string>
-    <string name="about_sources">\u062A\u0645 \u0627\u0639\u062A\u0645\u0627\u062F \u0645\u0635\u0627\u062F\u0631 \u0645\u0648\u062B\u0648\u0642\u0629 \u0648\u0645\u0639\u062A\u0645\u062F\u0629</string>
-    <string name="about_contact">\u0644\u0644\u062A\u0648\u0627\u0635\u0644 \u0645\u0639 \u0627\u0644\u0645\u0637\u0648\u0631: +966555877723</string>
-    <string name="about_desc">\u062A\u0637\u0628\u064A\u0642 \u0645\u062C\u0627\u0646\u064A \u0644\u0642\u0631\u0627\u0621\u0629 \u0627\u0644\u0642\u0631\u0622\u0646 \u0627\u0644\u0643\u0631\u064A\u0645 \u0645\u0639 \u0623\u0648\u0642\u0627\u062A \u0627\u0644\u0635\u0644\u0627\u0629 \u0648\u0627\u062A\u062C\u0627\u0647 \u0627\u0644\u0642\u0628\u0644\u0629 \u0648\u0627\u0644\u0628\u062D\u062B \u0648\u0627\u0644\u0641\u062A\u0627\u0648\u0649 \u0648\u062D\u0627\u0633\u0628\u0629 \u0627\u0644\u0632\u0643\u0627\u0629</string>
 </resources>
 STRINGS
 
@@ -640,6 +633,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_prayer -> loadFragment(PrayerFragment())
                 R.id.nav_qibla -> loadFragment(QiblaFragment())
                 R.id.nav_bookmarks -> loadFragment(BookmarksFragment())
+                R.id.nav_about -> startActivity(android.content.Intent(this, AboutActivity::class.java))
             }
             true
         }
@@ -655,21 +649,7 @@ class MainActivity : AppCompatActivity() {
             .replace(R.id.fragmentContainer, fragment)
             .addToBackStack(null)
             .commit()
-    
-    override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
-        menu.add(0, 99, 0, "\u062D\u0648\u0644 \u0627\u0644\u062A\u0637\u0628\u064A\u0642").setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_NEVER)
-        return true
     }
-
-    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
-        if (item.itemId == 99) {
-            startActivity(android.content.Intent(this, AboutActivity::class.java))
-            return true
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-}
 }
 MAINKT
 
@@ -1234,140 +1214,110 @@ class BookmarksFragment : Fragment() {
 }
 BOOKMARKSFRAG
 
-# ========== activity_about.xml ==========
-cat > $PROJECT/app/src/main/res/layout/activity_about.xml << 'ABOUTLAYOUT'
-<?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/blue_dark"
-    android:fillViewport="true">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:padding="32dp">
-        <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@mipmap/ic_launcher"
-            android:layout_marginTop="24dp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/about_title"
-            android:textColor="@color/gold"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/about_version"
-            android:textColor="#8899AA"
-            android:textSize="14sp"
-            android:layout_marginTop="4dp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/about_date"
-            android:textColor="#8899AA"
-            android:textSize="13sp"
-            android:layout_marginTop="2dp" />
-        <View
-            android:layout_width="200dp"
-            android:layout_height="2dp"
-            android:background="@color/gold"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="24dp"
-            android:alpha="0.3" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="\u2764"
-            android:textSize="32sp"
-            android:layout_marginBottom="8dp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/about_sadaqa"
-            android:textColor="@color/gold"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:lineSpacingMultiplier="1.4" />
-        <View
-            android:layout_width="200dp"
-            android:layout_height="1dp"
-            android:background="@color/gold"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
-            android:alpha="0.2" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/about_desc"
-            android:textColor="#AABBCC"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:lineSpacingMultiplier="1.5"
-            android:layout_marginBottom="16dp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/about_sources"
-            android:textColor="#88CC88"
-            android:textSize="13sp"
-            android:drawablePadding="8dp"
-            android:layout_marginBottom="8dp" />
-        <TextView
-            android:id="@+id/contactText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/about_contact"
-            android:textColor="@color/gold"
-            android:textSize="14sp"
-            android:layout_marginTop="16dp"
-            android:padding="12dp"
-            android:clickable="true"
-            android:focusable="true" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="quran.meshari.tech"
-            android:textColor="#6688AA"
-            android:textSize="12sp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="32dp" />
-    </LinearLayout>
-</ScrollView>
-ABOUTLAYOUT
-
 # ========== AboutActivity.kt ==========
 cat > $PROJECT/app/src/main/java/$PKG_PATH/AboutActivity.kt << 'ABOUTKT'
 package tech.meshari.quran
 
+import android.os.Bundle
 import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import android.widget.TextView
+import android.widget.LinearLayout
+import android.widget.ImageView
+import android.widget.Button
+import android.widget.ScrollView
+import android.graphics.Color
+import android.graphics.Typeface
+import android.view.Gravity
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 
 class AboutActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_about)
-        supportActionBar?.hide()
-
-        findViewById<TextView>(R.id.contactText)?.setOnClickListener {
-            val intent = Intent(Intent.ACTION_DIAL)
-            intent.data = Uri.parse("tel:+966555877723")
-            startActivity(intent)
+        val sv = ScrollView(this).apply { setBackgroundColor(Color.parseColor("#0a1628")) }
+        val ll = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            setPadding(48, 80, 48, 80)
         }
+        val logo = ImageView(this).apply {
+            setImageResource(R.drawable.app_logo)
+            layoutParams = LinearLayout.LayoutParams(300, 300).apply {
+                gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = 32
+            }
+        }
+        ll.addView(logo)
+        ll.addView(TextView(this).apply {
+            text = "القرآن الكريم"
+            setTextColor(Color.parseColor("#d4af37")); textSize = 28f
+            setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 16)
+        })
+        ll.addView(TextView(this).apply {
+            text = "❤ صدقة جارية ❤"
+            setTextColor(Color.parseColor("#e8b923")); textSize = 22f
+            setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER
+            setPadding(0, 16, 0, 24)
+        })
+        ll.addView(TextView(this).apply {
+            text = "تطبيق القرآن الكريم هو صدقة جارية لوجه الله تعالى.\n\n" +
+                "تم تطوير هذا التطبيق بالاعتماد على مصادر معتمدة وموثوقة:\n\n" +
+                "• مصحف المدينة النبوية الإلكتروني\n" +
+                "• أوقات الصلاة من مصادر فلكية دقيقة\n" +
+                "• اتجاه القبلة باستخدام حسابات جغرافية معتمدة\n" +
+                "• حاسبة الزكاة بأسعار المعادن المحدثة\n" +
+                "• الفتاوى من مصادر شرعية موثوقة\n\n" +
+                "نسأل الله أن يجعل هذا العمل خالصاً لوجهه الكريم\nوأن يجعله في ميزان حسنات كل من ساهم فيه."
+            setTextColor(Color.WHITE); textSize = 16f; gravity = Gravity.CENTER
+            setLineSpacing(8f, 1.2f); setPadding(0, 0, 0, 40)
+        })
+        ll.addView(android.view.View(this).apply {
+            setBackgroundColor(Color.parseColor("#1a3a5c"))
+            layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, 2).apply { bottomMargin = 32; topMargin = 8 }
+        })
+        ll.addView(TextView(this).apply {
+            text = "الإصدار: 4.0.0\nتاريخ النشر: مارس 2026"
+            setTextColor(Color.parseColor("#8899aa")); textSize = 14f
+            gravity = Gravity.CENTER; setPadding(0, 0, 0, 32)
+        })
+        ll.addView(TextView(this).apply {
+            text = "للتواصل مع المطور"
+            setTextColor(Color.parseColor("#d4af37")); textSize = 18f
+            setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 16)
+        })
+        ll.addView(Button(this).apply {
+            text = "📱 +966555877723"
+            setTextColor(Color.WHITE); setBackgroundColor(Color.parseColor("#1a5c3a"))
+            textSize = 18f; setPadding(48, 24, 48, 24)
+            layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = 24
+            }
+            setOnClickListener { startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:+966555877723"))) }
+        })
+        ll.addView(Button(this).apply {
+            text = "💬 واتساب"
+            setTextColor(Color.WHITE); setBackgroundColor(Color.parseColor("#25D366"))
+            textSize = 18f; setPadding(48, 24, 48, 24)
+            layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = 40
+            }
+            setOnClickListener { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/966555877723"))) }
+        })
+        ll.addView(TextView(this).apply {
+            text = "اللهم اجعل هذا العمل في ميزان حسناتنا يوم القيامة"
+            setTextColor(Color.parseColor("#d4af37")); textSize = 14f
+            gravity = Gravity.CENTER; setTypeface(null, Typeface.ITALIC)
+        })
+        sv.addView(ll); setContentView(sv)
+        supportActionBar?.apply { title = "حول التطبيق"; setDisplayHomeAsUpEnabled(true) }
     }
+    override fun onSupportNavigateUp(): Boolean { onBackPressed(); return true }
 }
 ABOUTKT
+
 
 # ========== proguard-rules.pro ==========
 cat > $PROJECT/app/proguard-rules.pro << 'PROGUARD'
@@ -1393,4 +1343,4 @@ echo "🎵 16 reciters with audio streaming"
 echo "🕌 Prayer times with location"
 echo "🧭 Qibla compass with sensors"
 echo "📌 Bookmarks with SharedPreferences"
-echo "🚀 Version: 3.0.0 (versionCode 4)"
+echo "🚀 Version: 4.0.0 (versionCode 4)"
