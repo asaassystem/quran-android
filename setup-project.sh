@@ -944,12 +944,13 @@ class ReaderFragment : Fragment() {
                 val surah = QuranData.getSurahByPage(currentPage)
                 val reciter = QuranData.reciters[selectedReciterIndex]
                 val url = QuranData.getAudioUrl(reciter, surah.n)
-                mediaPlayer = MediaPlayer().apply {
-                    setDataSource(url); prepareAsync()
-                    setOnPreparedListener { start(); isPlaying = true; btnPlay.setImageResource(android.R.drawable.ic_media_pause) }
-                    setOnCompletionListener { isPlaying = false; btnPlay.setImageResource(android.R.drawable.ic_media_play) }
-                    setOnErrorListener { _, _, _ -> isPlaying = false; btnPlay.setImageResource(android.R.drawable.ic_media_play); true }
-                }
+                val mp = MediaPlayer()
+                mp.setDataSource(url)
+                mp.setOnPreparedListener { mp.start(); this@ReaderFragment.isPlaying = true; btnPlay.setImageResource(android.R.drawable.ic_media_pause) }
+                mp.setOnCompletionListener { this@ReaderFragment.isPlaying = false; btnPlay.setImageResource(android.R.drawable.ic_media_play) }
+                mp.setOnErrorListener { _, _, _ -> this@ReaderFragment.isPlaying = false; btnPlay.setImageResource(android.R.drawable.ic_media_play); true }
+                mp.prepareAsync()
+                mediaPlayer = mp
             }
         }
 
