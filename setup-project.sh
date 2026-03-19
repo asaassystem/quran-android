@@ -13,7 +13,7 @@ mkdir -p $PROJECT/app/src/main/res/layout
 mkdir -p $PROJECT/app/src/main/res/values
 mkdir -p $PROJECT/app/src/main/res/values-night
 mkdir -p $PROJECT/app/src/main/res/drawable
-mkdir -p $PROJECT/app/src/main/res/mipmap-hdpi
+mkdir -p $PROJECT/app/src/main/res/mipmap-hdp
 mkdir -p $PROJECT/app/src/main/res/mipmap-mdpi
 mkdir -p $PROJECT/app/src/main/res/mipmap-xhdpi
 mkdir -p $PROJECT/app/src/main/res/mipmap-xxhdpi
@@ -75,7 +75,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 6
-        versionName = "4.2.0"
+        versionName = "4.3.0"
     }
     buildFeatures { viewBinding = true }
     compileOptions {
@@ -1442,7 +1442,7 @@ class AboutActivity : AppCompatActivity() {
             setTextColor(Color.WHITE); textSize = 16f; gravity = Gravity.CENTER; setLineSpacing(8f, 1.2f); setPadding(0, 0, 0, 40)
         })
         ll.addView(android.view.View(this).apply { setBackgroundColor(Color.parseColor("#1a3a5c")); layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, 2).apply { bottomMargin = 32; topMargin = 8 } })
-        ll.addView(TextView(this).apply { text = "الإصدار: 4.2.0\nتاريخ النشر: مارس 2026"; setTextColor(Color.parseColor("#8899aa")); textSize = 14f; gravity = Gravity.CENTER; setPadding(0, 0, 0, 32) })
+        ll.addView(TextView(this).apply { text = "الإصدار: 4.3.0\nتاريخ النشر: مارس 2026"; setTextColor(Color.parseColor("#8899aa")); textSize = 14f; gravity = Gravity.CENTER; setPadding(0, 0, 0, 32) })
         ll.addView(TextView(this).apply { text = "للتواصل مع المطور"; setTextColor(Color.parseColor("#d4af37")); textSize = 18f; setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER; setPadding(0, 0, 0, 16) })
         ll.addView(Button(this).apply { text = "📱 +966555877723"; setTextColor(Color.WHITE); setBackgroundColor(Color.parseColor("#0A1628")); textSize = 18f; setPadding(48, 24, 48, 24)
             layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = 24 }
@@ -1475,8 +1475,8 @@ android.useAndroidX=true
 org.gradle.jvmargs=-Xmx2048m
 GRADLEPROPS
 
-echo "✅ Quran Android app v4.2.0 created!"
+echo "✅ Quran Android app v4.3.0 created!"
 echo "📱 Package: tech.meshari.quran"
 echo "🎨 Theme: Blue gradients - NO green"
 echo "🆕 New: Fatwa + Zakat (live prices) + More menu"
-echo "🚀 Version: 4.2.0 (versionCode 6)"
+echo "🚀 Version: 4.3.0 (versionCode 7)"
