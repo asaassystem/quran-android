@@ -27,8 +27,8 @@ mkdir -p $PROJECT/gradle/wrapper
 # Download logo
 curl -sL "https://quran.meshari.tech/logoo.png" -o $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
 for d in xxhdpi xhdpi hdpi mdpi; do
-  cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/mipmap-${d}/ic_launcher.png
-  cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/mipmap-${d}/ic_launcher_round.png
+    cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/mipmap-${d}/ic_launcher.png
+    cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/mipmap-${d}/ic_launcher_round.png
 done
 cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
 cp $PROJECT/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png $PROJECT/app/src/main/res/drawable/app_logo.png
@@ -74,8 +74,8 @@ android {
         applicationId = "tech.meshari.quran"
         minSdk = 24
         targetSdk = 34
-        versionCode = 4
-        versionName = "4.0.0"
+        versionCode = 5
+        versionName = "4.1.0"
     }
     buildFeatures { viewBinding = true }
     compileOptions {
@@ -126,32 +126,25 @@ cat > $PROJECT/app/src/main/AndroidManifest.xml << 'MANIFEST'
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity
-            android:name=".SplashActivity"
-            android:exported="true"
-            android:theme="@style/SplashTheme">
+        <activity android:name=".SplashActivity" android:exported="true" android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity" android:screenOrientation="portrait"/>
-        <activity
-            android:name=".AboutActivity"
-            android:label="حول التطبيق"
-            android:theme="@style/AppTheme"
-            android:screenOrientation="portrait" />
+        <activity android:name=".AboutActivity" android:label="حول التطبيق" android:theme="@style/AppTheme" android:screenOrientation="portrait" />
     </application>
 </manifest>
 MANIFEST
 
-# ========== colors.xml ==========
+# ========== colors.xml (BLUE THEME - NO GREEN) ==========
 cat > $PROJECT/app/src/main/res/values/colors.xml << 'COLORS'
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#1B3A2D</color>
-    <color name="primary_dark">#0F2318</color>
-    <color name="primary_variant">#2D5A45</color>
+    <color name="primary">#0A1628</color>
+    <color name="primary_dark">#060E1A</color>
+    <color name="primary_variant">#132D54</color>
     <color name="accent">#C8A84E</color>
     <color name="accent_light">#E8D59A</color>
     <color name="gold">#D4A847</color>
@@ -192,7 +185,7 @@ cat > $PROJECT/app/src/main/res/values/themes.xml << 'THEMES'
     </style>
     <style name="GoldButton" parent="Widget.Material3.Button">
         <item name="backgroundTint">@color/gold</item>
-        <item name="android:textColor">#1B3A2D</item>
+        <item name="android:textColor">#0A1628</item>
         <item name="android:textSize">16sp</item>
         <item name="cornerRadius">25dp</item>
     </style>
@@ -208,7 +201,9 @@ cat > $PROJECT/app/src/main/res/values/strings.xml << 'STRINGS'
     <string name="tab_prayer">الصلاة</string>
     <string name="tab_qibla">القبلة</string>
     <string name="tab_bookmarks">المحفوظات</string>
-    <string name="tab_about">حول</string>
+    <string name="tab_more">المزيد</string>
+    <string name="tab_fatwa">فتاوى</string>
+    <string name="tab_zakat">الزكاة</string>
     <string name="search_hint">ابحث في القرآن...</string>
     <string name="no_internet">لا يوجد اتصال بالإنترنت</string>
     <string name="loading">جاري التحميل...</string>
@@ -238,7 +233,7 @@ cat > $PROJECT/app/src/main/res/menu/bottom_nav.xml << 'MENU'
     <item android:id="@+id/nav_prayer" android:icon="@android:drawable/ic_menu_my_calendar" android:title="@string/tab_prayer"/>
     <item android:id="@+id/nav_qibla" android:icon="@android:drawable/ic_menu_compass" android:title="@string/tab_qibla"/>
     <item android:id="@+id/nav_bookmarks" android:icon="@android:drawable/ic_menu_save" android:title="@string/tab_bookmarks"/>
-    <item android:id="@+id/nav_about" android:icon="@android:drawable/ic_menu_info_details" android:title="@string/tab_about"/>
+    <item android:id="@+id/nav_more" android:icon="@android:drawable/ic_menu_more" android:title="@string/tab_more"/>
 </menu>
 MENU
 
@@ -247,20 +242,15 @@ cat > $PROJECT/app/src/main/res/layout/activity_splash.xml << 'SPLASHLAYOUT'
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:orientation="vertical" android:gravity="center"
-    android:background="@color/primary_dark">
-    <ImageView android:id="@+id/splashLogo"
-        android:layout_width="180dp" android:layout_height="180dp"
+    android:orientation="vertical" android:gravity="center" android:background="@color/primary_dark">
+    <ImageView android:id="@+id/splashLogo" android:layout_width="180dp" android:layout_height="180dp"
         android:src="@drawable/app_logo" android:alpha="0"/>
-    <TextView android:id="@+id/splashTitle"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:text="القرآن الكريم" android:textColor="@color/gold"
-        android:textSize="32sp" android:textStyle="bold"
-        android:layout_marginTop="24dp" android:alpha="0"/>
-    <TextView android:id="@+id/splashSubtitle"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:text="quran.meshari.tech" android:textColor="@color/text_secondary"
-        android:textSize="14sp" android:layout_marginTop="8dp" android:alpha="0"/>
+    <TextView android:id="@+id/splashTitle" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="القرآن الكريم" android:textColor="@color/gold" android:textSize="32sp"
+        android:textStyle="bold" android:layout_marginTop="24dp" android:alpha="0"/>
+    <TextView android:id="@+id/splashSubtitle" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="quran.meshari.tech" android:textColor="@color/text_secondary" android:textSize="14sp"
+        android:layout_marginTop="8dp" android:alpha="0"/>
 </LinearLayout>
 SPLASHLAYOUT
 
@@ -271,24 +261,19 @@ cat > $PROJECT/app/src/main/res/layout/activity_main.xml << 'MAINLAYOUT'
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical" android:background="@color/bg_dark">
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
+    <com.google.android.material.appbar.MaterialToolbar android:id="@+id/toolbar"
         android:layout_width="match_parent" android:layout_height="56dp"
-        android:background="@color/primary" app:titleTextColor="@color/gold"
-        app:title="القرآن الكريم" app:navigationIcon="@drawable/app_logo">
+        android:background="@color/primary" app:titleTextColor="@color/gold" app:title="القرآن الكريم"
+        app:navigationIcon="@drawable/app_logo">
         <ImageView android:layout_width="32dp" android:layout_height="32dp"
-            android:src="@drawable/app_logo" android:layout_gravity="end"
-            android:layout_marginEnd="16dp"/>
+            android:src="@drawable/app_logo" android:layout_gravity="end" android:layout_marginEnd="16dp"/>
     </com.google.android.material.appbar.MaterialToolbar>
     <FrameLayout android:id="@+id/fragmentContainer"
-        android:layout_width="match_parent" android:layout_height="0dp"
-        android:layout_weight="1"/>
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNav"
+        android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"/>
+    <com.google.android.material.bottomnavigation.BottomNavigationView android:id="@+id/bottomNav"
         android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:background="@color/bottom_nav_bg"
-        app:itemTextColor="@color/gold" app:itemIconTint="@color/gold"
-        app:labelVisibilityMode="labeled" app:menu="@menu/bottom_nav"/>
+        android:background="@color/bottom_nav_bg" app:itemTextColor="@color/gold"
+        app:itemIconTint="@color/gold" app:labelVisibilityMode="labeled" app:menu="@menu/bottom_nav"/>
 </LinearLayout>
 MAINLAYOUT
 
@@ -299,36 +284,28 @@ cat > $PROJECT/app/src/main/res/layout/fragment_surah_list.xml << 'SURAHLISTLAYO
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical" android:background="@color/bg_dark">
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:orientation="vertical" android:padding="16dp"
-        android:background="@color/primary">
+        android:orientation="vertical" android:padding="16dp" android:background="@color/primary">
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="🕌 القرآن الكريم" android:textColor="@color/gold"
-            android:textSize="22sp" android:textStyle="bold" android:gravity="center"/>
-        <EditText android:id="@+id/searchEdit"
-            android:layout_width="match_parent" android:layout_height="48dp"
+            android:text="🕌 القرآن الكريم" android:textColor="@color/gold" android:textSize="22sp"
+            android:textStyle="bold" android:gravity="center"/>
+        <EditText android:id="@+id/searchEdit" android:layout_width="match_parent" android:layout_height="48dp"
             android:layout_marginTop="12dp" android:hint="@string/search_hint"
             android:textColorHint="@color/text_secondary" android:textColor="@color/text_primary"
-            android:background="@drawable/search_bg" android:paddingStart="16dp"
-            android:paddingEnd="16dp" android:textSize="15sp" android:singleLine="true"
-            android:drawableStart="@android:drawable/ic_menu_search"
-            android:drawablePadding="8dp" android:inputType="text"/>
-        <LinearLayout android:id="@+id/filterButtons"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:gravity="center" android:layout_marginTop="8dp" android:orientation="horizontal">
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnAll" style="@style/GoldButton"
-                android:layout_width="wrap_content" android:layout_height="36dp"
-                android:text="@string/all" android:textSize="13sp" android:layout_marginEnd="8dp"/>
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnMeccan" style="@style/GoldButton"
-                android:layout_width="wrap_content" android:layout_height="36dp"
-                android:text="@string/meccan" android:textSize="13sp" android:layout_marginEnd="8dp"
-                android:backgroundTint="@color/bg_card"/>
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnMedinan" style="@style/GoldButton"
-                android:layout_width="wrap_content" android:layout_height="36dp"
-                android:text="@string/medinan" android:textSize="13sp"
-                android:backgroundTint="@color/bg_card"/>
+            android:background="@drawable/search_bg" android:paddingStart="16dp" android:paddingEnd="16dp"
+            android:textSize="15sp" android:singleLine="true"
+            android:drawableStart="@android:drawable/ic_menu_search" android:drawablePadding="8dp" android:inputType="text"/>
+        <LinearLayout android:id="@+id/filterButtons" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:gravity="center" android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnAll" style="@style/GoldButton"
+                android:layout_width="wrap_content" android:layout_height="36dp" android:text="@string/all"
+                android:textSize="13sp" android:layout_marginEnd="8dp"/>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnMeccan" style="@style/GoldButton"
+                android:layout_width="wrap_content" android:layout_height="36dp" android:text="@string/meccan"
+                android:textSize="13sp" android:layout_marginEnd="8dp" android:backgroundTint="@color/bg_card"/>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnMedinan" style="@style/GoldButton"
+                android:layout_width="wrap_content" android:layout_height="36dp" android:text="@string/medinan"
+                android:textSize="13sp" android:backgroundTint="@color/bg_card"/>
         </LinearLayout>
     </LinearLayout>
     <androidx.recyclerview.widget.RecyclerView android:id="@+id/surahRecycler"
@@ -340,46 +317,31 @@ SURAHLISTLAYOUT
 # ========== item_surah.xml ==========
 cat > $PROJECT/app/src/main/res/layout/item_surah.xml << 'ITEMSURAH'
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:layout_margin="4dp" app:cardBackgroundColor="@color/bg_card"
-    app:cardCornerRadius="12dp" app:cardElevation="2dp"
-    app:strokeWidth="0dp">
+    android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="4dp"
+    app:cardBackgroundColor="@color/bg_card" app:cardCornerRadius="12dp" app:cardElevation="2dp" app:strokeWidth="0dp">
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:orientation="horizontal" android:padding="14dp"
-        android:gravity="center_vertical">
+        android:orientation="horizontal" android:padding="14dp" android:gravity="center_vertical">
         <FrameLayout android:layout_width="44dp" android:layout_height="44dp">
-            <View android:layout_width="44dp" android:layout_height="44dp"
-                android:background="@drawable/circle_gold"/>
-            <TextView android:id="@+id/surahNumber"
-                android:layout_width="match_parent" android:layout_height="match_parent"
-                android:gravity="center" android:textColor="@color/primary_dark"
-                android:textSize="16sp" android:textStyle="bold"/>
+            <View android:layout_width="44dp" android:layout_height="44dp" android:background="@drawable/circle_gold"/>
+            <TextView android:id="@+id/surahNumber" android:layout_width="match_parent" android:layout_height="match_parent"
+                android:gravity="center" android:textColor="@color/primary_dark" android:textSize="16sp" android:textStyle="bold"/>
         </FrameLayout>
-        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_weight="1" android:orientation="vertical"
-            android:layout_marginStart="14dp" android:layout_marginEnd="8dp">
-            <TextView android:id="@+id/surahNameAr"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:textColor="@color/text_primary" android:textSize="18sp"
-                android:textStyle="bold"/>
-            <TextView android:id="@+id/surahNameEn"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:orientation="vertical" android:layout_marginStart="14dp" android:layout_marginEnd="8dp">
+            <TextView android:id="@+id/surahNameAr" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/text_primary" android:textSize="18sp" android:textStyle="bold"/>
+            <TextView android:id="@+id/surahNameEn" android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:textColor="@color/text_secondary" android:textSize="12sp"/>
         </LinearLayout>
         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:orientation="vertical" android:gravity="end">
-            <TextView android:id="@+id/surahType"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:textColor="@color/accent_light" android:textSize="11sp"
-                android:background="@drawable/badge_bg" android:paddingStart="8dp"
-                android:paddingEnd="8dp" android:paddingTop="2dp" android:paddingBottom="2dp"/>
-            <TextView android:id="@+id/surahAyahs"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:textColor="@color/text_secondary" android:textSize="12sp"
-                android:layout_marginTop="4dp"/>
+            <TextView android:id="@+id/surahType" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/accent_light" android:textSize="11sp" android:background="@drawable/badge_bg"
+                android:paddingStart="8dp" android:paddingEnd="8dp" android:paddingTop="2dp" android:paddingBottom="2dp"/>
+            <TextView android:id="@+id/surahAyahs" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/text_secondary" android:textSize="12sp" android:layout_marginTop="4dp"/>
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
@@ -392,51 +354,37 @@ cat > $PROJECT/app/src/main/res/layout/fragment_reader.xml << 'READERLAYOUT'
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical" android:background="@color/bg_dark">
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:background="@color/primary" android:padding="10dp"
-        android:gravity="center_vertical" android:orientation="horizontal">
-        <ImageView android:id="@+id/btnBack"
-            android:layout_width="32dp" android:layout_height="32dp"
+        android:background="@color/primary" android:padding="10dp" android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <ImageView android:id="@+id/btnBack" android:layout_width="32dp" android:layout_height="32dp"
             android:src="@android:drawable/ic_menu_revert" android:padding="4dp"/>
-        <TextView android:id="@+id/surahTitle"
-            android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_weight="1" android:textColor="@color/gold"
-            android:textSize="20sp" android:textStyle="bold" android:gravity="center"/>
-        <TextView android:id="@+id/pageInfo"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
+        <TextView android:id="@+id/surahTitle" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:textColor="@color/gold" android:textSize="20sp"
+            android:textStyle="bold" android:gravity="center"/>
+        <TextView android:id="@+id/pageInfo" android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:textColor="@color/text_secondary" android:textSize="12sp"/>
     </LinearLayout>
-    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp"
-        android:layout_weight="1">
-        <ImageView android:id="@+id/quranPageImage"
-            android:layout_width="match_parent" android:layout_height="match_parent"
-            android:scaleType="fitCenter" android:background="#FFFFF8E1"/>
-        <ProgressBar android:id="@+id/pageLoading"
-            android:layout_width="48dp" android:layout_height="48dp"
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <ImageView android:id="@+id/quranPageImage" android:layout_width="match_parent"
+            android:layout_height="match_parent" android:scaleType="fitCenter" android:background="#FFFFF8E1"/>
+        <ProgressBar android:id="@+id/pageLoading" android:layout_width="48dp" android:layout_height="48dp"
             android:layout_gravity="center" android:indeterminateTint="@color/gold"/>
     </FrameLayout>
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:background="@color/primary" android:padding="8dp"
-        android:gravity="center" android:orientation="horizontal">
-        <ImageView android:id="@+id/btnNext"
-            android:layout_width="48dp" android:layout_height="48dp"
+        android:background="@color/primary" android:padding="8dp" android:gravity="center"
+        android:orientation="horizontal">
+        <ImageView android:id="@+id/btnNext" android:layout_width="48dp" android:layout_height="48dp"
             android:src="@android:drawable/ic_media_previous" android:padding="12dp"
             android:background="?selectableItemBackgroundBorderless"/>
-        <Spinner android:id="@+id/reciterSpinner"
-            android:layout_width="0dp" android:layout_height="40dp"
-            android:layout_weight="1" android:layout_marginStart="8dp"
-            android:layout_marginEnd="4dp" android:background="@drawable/spinner_bg"
-            android:popupBackground="@color/bg_card"/>
-        <ImageView android:id="@+id/btnPlay"
-            android:layout_width="48dp" android:layout_height="48dp"
-            android:src="@android:drawable/ic_media_play" android:padding="8dp"
-            android:background="@drawable/circle_gold"/>
-        <ImageView android:id="@+id/btnTafsir"
-            android:layout_width="48dp" android:layout_height="48dp"
+        <Spinner android:id="@+id/reciterSpinner" android:layout_width="0dp" android:layout_height="40dp"
+            android:layout_weight="1" android:layout_marginStart="8dp" android:layout_marginEnd="4dp"
+            android:background="@drawable/spinner_bg" android:popupBackground="@color/bg_card"/>
+        <ImageView android:id="@+id/btnPlay" android:layout_width="48dp" android:layout_height="48dp"
+            android:src="@android:drawable/ic_media_play" android:padding="8dp" android:background="@drawable/circle_gold"/>
+        <ImageView android:id="@+id/btnTafsir" android:layout_width="48dp" android:layout_height="48dp"
             android:src="@android:drawable/ic_menu_info_details" android:padding="12dp"
-            android:layout_marginStart="4dp"
-            android:background="?selectableItemBackgroundBorderless"/>
-        <ImageView android:id="@+id/btnPrev"
-            android:layout_width="48dp" android:layout_height="48dp"
+            android:layout_marginStart="4dp" android:background="?selectableItemBackgroundBorderless"/>
+        <ImageView android:id="@+id/btnPrev" android:layout_width="48dp" android:layout_height="48dp"
             android:src="@android:drawable/ic_media_next" android:padding="12dp"
             android:background="?selectableItemBackgroundBorderless"/>
     </LinearLayout>
@@ -447,30 +395,23 @@ READERLAYOUT
 cat > $PROJECT/app/src/main/res/layout/fragment_prayer.xml << 'PRAYERLAYOUT'
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent"
-    android:background="@color/bg_dark">
+    android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/bg_dark">
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
         android:orientation="vertical" android:padding="20dp" android:gravity="center">
         <ImageView android:layout_width="80dp" android:layout_height="80dp"
             android:src="@drawable/app_logo" android:layout_marginTop="16dp"/>
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="🕌 أوقات الصلاة" android:textColor="@color/gold"
-            android:textSize="24sp" android:textStyle="bold" android:layout_marginTop="12dp"/>
-        <TextView android:id="@+id/cityName"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:textColor="@color/text_secondary" android:textSize="14sp"
-            android:layout_marginTop="4dp"/>
-        <TextView android:id="@+id/hijriDate"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:textColor="@color/accent_light" android:textSize="13sp"
-            android:layout_marginTop="4dp"/>
-        <ProgressBar android:id="@+id/prayerLoading"
-            android:layout_width="48dp" android:layout_height="48dp"
+            android:text="🕌 أوقات الصلاة" android:textColor="@color/gold" android:textSize="24sp"
+            android:textStyle="bold" android:layout_marginTop="12dp"/>
+        <TextView android:id="@+id/cityName" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary" android:textSize="14sp" android:layout_marginTop="4dp"/>
+        <TextView android:id="@+id/hijriDate" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textColor="@color/accent_light" android:textSize="13sp" android:layout_marginTop="4dp"/>
+        <ProgressBar android:id="@+id/prayerLoading" android:layout_width="48dp" android:layout_height="48dp"
             android:layout_marginTop="24dp" android:indeterminateTint="@color/gold"/>
-        <LinearLayout android:id="@+id/prayerContainer"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="vertical" android:layout_marginTop="16dp"
-            android:visibility="gone"/>
+        <LinearLayout android:id="@+id/prayerContainer" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:orientation="vertical"
+            android:layout_marginTop="16dp" android:visibility="gone"/>
     </LinearLayout>
 </ScrollView>
 PRAYERLAYOUT
@@ -480,26 +421,19 @@ cat > $PROJECT/app/src/main/res/layout/fragment_qibla.xml << 'QIBLALAYOUT'
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:orientation="vertical" android:gravity="center"
-    android:background="@color/bg_dark" android:padding="24dp">
-    <ImageView android:layout_width="80dp" android:layout_height="80dp"
-        android:src="@drawable/app_logo"/>
+    android:orientation="vertical" android:gravity="center" android:background="@color/bg_dark" android:padding="24dp">
+    <ImageView android:layout_width="80dp" android:layout_height="80dp" android:src="@drawable/app_logo"/>
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:text="🧭 اتجاه القبلة" android:textColor="@color/gold"
-        android:textSize="26sp" android:textStyle="bold" android:layout_marginTop="16dp"/>
-    <FrameLayout android:layout_width="260dp" android:layout_height="260dp"
-        android:layout_marginTop="32dp">
-        <View android:id="@+id/compassView"
-            android:layout_width="260dp" android:layout_height="260dp"/>
-        <TextView android:id="@+id/qiblaDirection"
-            android:layout_width="match_parent" android:layout_height="match_parent"
-            android:gravity="center" android:textColor="@color/gold"
-            android:textSize="48sp" android:textStyle="bold" android:text="🕋"/>
+        android:text="🧭 اتجاه القبلة" android:textColor="@color/gold" android:textSize="26sp"
+        android:textStyle="bold" android:layout_marginTop="16dp"/>
+    <FrameLayout android:layout_width="260dp" android:layout_height="260dp" android:layout_marginTop="32dp">
+        <View android:id="@+id/compassView" android:layout_width="260dp" android:layout_height="260dp"/>
+        <TextView android:id="@+id/qiblaDirection" android:layout_width="match_parent" android:layout_height="match_parent"
+            android:gravity="center" android:textColor="@color/gold" android:textSize="48sp"
+            android:textStyle="bold" android:text="🕋"/>
     </FrameLayout>
-    <TextView android:id="@+id/qiblaDegrees"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:textColor="@color/text_secondary" android:textSize="18sp"
-        android:layout_marginTop="16dp"/>
+    <TextView android:id="@+id/qiblaDegrees" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="@color/text_secondary" android:textSize="18sp" android:layout_marginTop="16dp"/>
 </LinearLayout>
 QIBLALAYOUT
 
@@ -514,17 +448,13 @@ cat > $PROJECT/app/src/main/res/layout/fragment_bookmarks.xml << 'BOOKMARKSLAYOU
         <ImageView android:layout_width="28dp" android:layout_height="28dp"
             android:src="@drawable/app_logo" android:layout_marginEnd="8dp"/>
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="📌 المحفوظات" android:textColor="@color/gold"
-            android:textSize="22sp" android:textStyle="bold"/>
+            android:text="📌 المحفوظات" android:textColor="@color/gold" android:textSize="22sp" android:textStyle="bold"/>
     </LinearLayout>
-    <TextView android:id="@+id/emptyBookmarks"
-        android:layout_width="match_parent" android:layout_height="match_parent"
-        android:text="لا توجد صفحات محفوظة\nاضغط ☆ في صفحة القرآن للحفظ"
-        android:textColor="@color/text_secondary" android:textSize="16sp"
-        android:gravity="center" android:visibility="gone"/>
+    <TextView android:id="@+id/emptyBookmarks" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:text="لا توجد صفحات محفوظة\nاضغط ☆ في صفحة القرآن للحفظ" android:textColor="@color/text_secondary"
+        android:textSize="16sp" android:gravity="center" android:visibility="gone"/>
     <androidx.recyclerview.widget.RecyclerView android:id="@+id/bookmarksRecycler"
-        android:layout_width="match_parent" android:layout_height="match_parent"
-        android:padding="8dp"/>
+        android:layout_width="match_parent" android:layout_height="match_parent" android:padding="8dp"/>
 </LinearLayout>
 BOOKMARKSLAYOUT
 
@@ -533,7 +463,7 @@ cat > $PROJECT/app/src/main/res/drawable/search_bg.xml << 'SEARCHBG'
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
     <solid android:color="#1A3D5C"/><corners android:radius="24dp"/>
-    <stroke android:width="1dp" android:color="#2D5A45"/>
+    <stroke android:width="1dp" android:color="#132D54"/>
 </shape>
 SEARCHBG
 
@@ -596,13 +526,8 @@ class SplashActivity : AppCompatActivity() {
         val titleAlpha = ObjectAnimator.ofFloat(title, "alpha", 0f, 1f).setDuration(500)
         val titleY = ObjectAnimator.ofFloat(title, "translationY", 30f, 0f).setDuration(500)
         val subAlpha = ObjectAnimator.ofFloat(subtitle, "alpha", 0f, 1f).setDuration(400)
-        AnimatorSet().apply {
-            playTogether(logoAlpha, logoScale, logoScaleY)
-            start()
-        }
-        logo.postDelayed({
-            AnimatorSet().apply { playTogether(titleAlpha, titleY); start() }
-        }, 500)
+        AnimatorSet().apply { playTogether(logoAlpha, logoScale, logoScaleY); start() }
+        logo.postDelayed({ AnimatorSet().apply { playTogether(titleAlpha, titleY); start() } }, 500)
         logo.postDelayed({ subAlpha.start() }, 800)
         logo.postDelayed({
             startActivity(Intent(this, MainActivity::class.java))
@@ -635,22 +560,17 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_prayer -> loadFragment(PrayerFragment())
                 R.id.nav_qibla -> loadFragment(QiblaFragment())
                 R.id.nav_bookmarks -> loadFragment(BookmarksFragment())
-                R.id.nav_about -> startActivity(android.content.Intent(this, AboutActivity::class.java))
+                R.id.nav_more -> loadFragment(MoreFragment())
             }
             true
         }
     }
     fun loadFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, fragment)
-            .commit()
+        supportFragmentManager.beginTransaction().replace(R.id.fragmentContainer, fragment).commit()
     }
     fun openReader(surahNumber: Int, page: Int) {
         val fragment = ReaderFragment.newInstance(surahNumber, page)
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, fragment)
-            .addToBackStack(null)
-            .commit()
+        supportFragmentManager.beginTransaction().replace(R.id.fragmentContainer, fragment).addToBackStack(null).commit()
     }
 }
 MAINKT
@@ -659,15 +579,9 @@ MAINKT
 cat > $PROJECT/app/src/main/java/$PKG_PATH/data/Models.kt << 'MODELS'
 package tech.meshari.quran.data
 
-data class Surah(
-    val n: Int, val name: String, val ename: String,
-    val ayas: Int, val type: String, val page: Int
-)
+data class Surah(val n: Int, val name: String, val ename: String, val ayas: Int, val type: String, val page: Int)
 data class Reciter(val id: String, val name: String, val server: String)
-data class PrayerTimes(
-    val fajr: String, val sunrise: String, val dhuhr: String,
-    val asr: String, val maghrib: String, val isha: String
-)
+data class PrayerTimes(val fajr: String, val sunrise: String, val dhuhr: String, val asr: String, val maghrib: String, val isha: String)
 MODELS
 
 cat > $PROJECT/app/src/main/java/$PKG_PATH/data/QuranData.kt << 'QURANDATA'
@@ -733,7 +647,6 @@ object QuranData {
         Surah(111,"المسد","Al-Masad",5,"Meccan",603),Surah(112,"الإخلاص","Al-Ikhlaas",4,"Meccan",604),
         Surah(113,"الفلق","Al-Falaq",5,"Meccan",604),Surah(114,"الناس","An-Naas",6,"Meccan",604)
     )
-
     val reciters = listOf(
         Reciter("102","ماهر المعيقلي","https://server12.mp3quran.net/maher/"),
         Reciter("110","مشاري العفاسي","https://server8.mp3quran.net/afs/"),
@@ -752,15 +665,12 @@ object QuranData {
         Reciter("105","محمد صديق المنشاوي","https://server10.mp3quran.net/minsh/"),
         Reciter("101","عبدالباسط عبدالصمد","https://server7.mp3quran.net/basit/")
     )
-
     fun getPageImageUrl(page: Int): String {
         return "https://surahquran.com/img/pages-quran/page" + page.toString().padStart(3, '0') + ".png"
     }
-
     fun getAudioUrl(reciter: Reciter, surahNumber: Int): String {
         return reciter.server + surahNumber.toString().padStart(3, '0') + ".mp3"
     }
-
     fun getSurahByPage(page: Int): Surah {
         return surahs.lastOrNull { it.page <= page } ?: surahs[0]
     }
@@ -791,7 +701,6 @@ class SurahListFragment : Fragment() {
     private var currentFilter = "all"
     private var searchQuery = ""
     private lateinit var adapter: SurahAdapter
-
     override fun onCreateView(inflater: LayoutInflater, c: ViewGroup?, s: Bundle?): View {
         val view = inflater.inflate(R.layout.fragment_surah_list, c, false)
         val recycler = view.findViewById<RecyclerView>(R.id.surahRecycler)
@@ -799,37 +708,28 @@ class SurahListFragment : Fragment() {
         val btnAll = view.findViewById<MaterialButton>(R.id.btnAll)
         val btnMeccan = view.findViewById<MaterialButton>(R.id.btnMeccan)
         val btnMedinan = view.findViewById<MaterialButton>(R.id.btnMedinan)
-
-        adapter = SurahAdapter { surah ->
-            (activity as? MainActivity)?.openReader(surah.n, surah.page)
-        }
+        adapter = SurahAdapter { surah -> (activity as? MainActivity)?.openReader(surah.n, surah.page) }
         recycler.layoutManager = GridLayoutManager(requireContext(), 2)
         recycler.adapter = adapter
         updateList()
-
         search.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
             override fun onTextChanged(s: CharSequence?, st: Int, b: Int, c: Int) {}
             override fun afterTextChanged(s: Editable?) { searchQuery = s.toString(); updateList() }
         })
-
         btnAll.setOnClickListener { currentFilter = "all"; updateButtons(btnAll, btnMeccan, btnMedinan); updateList() }
         btnMeccan.setOnClickListener { currentFilter = "Meccan"; updateButtons(btnMeccan, btnAll, btnMedinan); updateList() }
         btnMedinan.setOnClickListener { currentFilter = "Medinan"; updateButtons(btnMedinan, btnAll, btnMeccan); updateList() }
         return view
     }
-
     private fun updateButtons(active: MaterialButton, vararg others: MaterialButton) {
         active.setBackgroundColor(resources.getColor(R.color.gold, null))
         others.forEach { it.setBackgroundColor(resources.getColor(R.color.bg_card, null)) }
     }
-
     private fun updateList() {
         var list = QuranData.surahs
         if (currentFilter != "all") list = list.filter { it.type == currentFilter }
-        if (searchQuery.isNotEmpty()) list = list.filter {
-            it.name.contains(searchQuery) || it.ename.contains(searchQuery, true) || it.n.toString() == searchQuery
-        }
+        if (searchQuery.isNotEmpty()) list = list.filter { it.name.contains(searchQuery) || it.ename.contains(searchQuery, true) || it.n.toString() == searchQuery }
         adapter.submitList(list)
     }
 }
@@ -849,11 +749,10 @@ import androidx.recyclerview.widget.RecyclerView
 import tech.meshari.quran.R
 import tech.meshari.quran.data.Surah
 
-class SurahAdapter(private val onClick: (Surah) -> Unit) :
-    ListAdapter<Surah, SurahAdapter.VH>(object : DiffUtil.ItemCallback<Surah>() {
-        override fun areItemsTheSame(a: Surah, b: Surah) = a.n == b.n
-        override fun areContentsTheSame(a: Surah, b: Surah) = a == b
-    }) {
+class SurahAdapter(private val onClick: (Surah) -> Unit) : ListAdapter<Surah, SurahAdapter.VH>(object : DiffUtil.ItemCallback<Surah>() {
+    override fun areItemsTheSame(a: Surah, b: Surah) = a.n == b.n
+    override fun areContentsTheSame(a: Surah, b: Surah) = a == b
+}) {
     inner class VH(v: View) : RecyclerView.ViewHolder(v) {
         val number: TextView = v.findViewById(R.id.surahNumber)
         val nameAr: TextView = v.findViewById(R.id.surahNameAr)
@@ -861,9 +760,7 @@ class SurahAdapter(private val onClick: (Surah) -> Unit) :
         val type: TextView = v.findViewById(R.id.surahType)
         val ayahs: TextView = v.findViewById(R.id.surahAyahs)
     }
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-        VH(LayoutInflater.from(parent.context).inflate(R.layout.item_surah, parent, false))
-
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = VH(LayoutInflater.from(parent.context).inflate(R.layout.item_surah, parent, false))
     override fun onBindViewHolder(holder: VH, position: Int) {
         val s = getItem(position)
         holder.number.text = s.n.toString()
@@ -896,13 +793,11 @@ class ReaderFragment : Fragment() {
     private var mediaPlayer: MediaPlayer? = null
     private var isPlaying = false
     private var selectedReciterIndex = 0
-
     companion object {
         fun newInstance(surahNum: Int, page: Int) = ReaderFragment().apply {
             arguments = Bundle().apply { putInt("surah", surahNum); putInt("page", page) }
         }
     }
-
     override fun onCreateView(inflater: LayoutInflater, c: ViewGroup?, s: Bundle?): View {
         val view = inflater.inflate(R.layout.fragment_reader, c, false)
         currentPage = arguments?.getInt("page", 1) ?: 1
@@ -915,7 +810,6 @@ class ReaderFragment : Fragment() {
         val btnPlay = view.findViewById<ImageView>(R.id.btnPlay)
         val btnBack = view.findViewById<ImageView>(R.id.btnBack)
         val spinner = view.findViewById<Spinner>(R.id.reciterSpinner)
-
         val reciterNames = QuranData.reciters.map { it.name }
         spinner.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, reciterNames)
         spinner.setSelection(0)
@@ -923,7 +817,6 @@ class ReaderFragment : Fragment() {
             override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) { selectedReciterIndex = pos }
             override fun onNothingSelected(p: AdapterView<*>?) {}
         }
-
         fun loadPage() {
             val surah = QuranData.getSurahByPage(currentPage)
             title.text = "سورة ${surah.name}"
@@ -931,24 +824,18 @@ class ReaderFragment : Fragment() {
             pageLoading.visibility = View.VISIBLE
             Glide.with(this).load(QuranData.getPageImageUrl(currentPage))
                 .into(object : com.bumptech.glide.request.target.CustomTarget<android.graphics.drawable.Drawable>() {
-                    override fun onResourceReady(r: android.graphics.drawable.Drawable, t: com.bumptech.glide.request.transition.Transition<in android.graphics.drawable.Drawable>?) {
-                        pageImage.setImageDrawable(r); pageLoading.visibility = View.GONE
-                    }
+                    override fun onResourceReady(r: android.graphics.drawable.Drawable, t: com.bumptech.glide.request.transition.Transition<in android.graphics.drawable.Drawable>?) { pageImage.setImageDrawable(r); pageLoading.visibility = View.GONE }
                     override fun onLoadCleared(p: android.graphics.drawable.Drawable?) {}
                     override fun onLoadFailed(e: android.graphics.drawable.Drawable?) { pageLoading.visibility = View.GONE }
                 })
         }
         loadPage()
-
         btnPrev.setOnClickListener { if (currentPage > 1) { currentPage--; loadPage() } }
         btnNext.setOnClickListener { if (currentPage < 604) { currentPage++; loadPage() } }
         btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
-
         btnPlay.setOnClickListener {
-            if (isPlaying) {
-                mediaPlayer?.stop(); mediaPlayer?.release(); mediaPlayer = null
-                isPlaying = false; btnPlay.setImageResource(android.R.drawable.ic_media_play)
-            } else {
+            if (isPlaying) { mediaPlayer?.stop(); mediaPlayer?.release(); mediaPlayer = null; isPlaying = false; btnPlay.setImageResource(android.R.drawable.ic_media_play) }
+            else {
                 val surah = QuranData.getSurahByPage(currentPage)
                 val reciter = QuranData.reciters[selectedReciterIndex]
                 val url = QuranData.getAudioUrl(reciter, surah.n)
@@ -957,19 +844,13 @@ class ReaderFragment : Fragment() {
                 mp.setOnPreparedListener { mp.start(); this@ReaderFragment.isPlaying = true; btnPlay.setImageResource(android.R.drawable.ic_media_pause) }
                 mp.setOnCompletionListener { this@ReaderFragment.isPlaying = false; btnPlay.setImageResource(android.R.drawable.ic_media_play) }
                 mp.setOnErrorListener { _, _, _ -> this@ReaderFragment.isPlaying = false; btnPlay.setImageResource(android.R.drawable.ic_media_play); true }
-                mp.prepareAsync()
-                mediaPlayer = mp
+                mp.prepareAsync(); mediaPlayer = mp
             }
         }
-
         view.findViewById<ImageView>(R.id.btnTafsir).setOnClickListener {
             val surah = QuranData.getSurahByPage(currentPage)
             val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext())
-            val tv = TextView(requireContext()).apply {
-                text = "جاري تحميل تفسير سورة ${surah.name}..."
-                textSize = 16f; setPadding(32,32,32,32)
-                setTextColor(resources.getColor(R.color.text_primary, null))
-            }
+            val tv = TextView(requireContext()).apply { text = "جاري تحميل تفسير سورة ${surah.name}..."; textSize = 16f; setPadding(32,32,32,32); setTextColor(resources.getColor(R.color.text_primary, null)) }
             dialog.setContentView(tv); dialog.show()
             Thread {
                 try {
@@ -979,23 +860,14 @@ class ReaderFragment : Fragment() {
                     val obj = com.google.gson.JsonParser.parseString(json).asJsonObject
                     val ayahs = obj.getAsJsonObject("data").getAsJsonArray("ayahs")
                     val sb = StringBuilder()
-                    for (i in 0 until ayahs.size()) {
-                        val a = ayahs[i].asJsonObject
-                        sb.append("﴿${a.get("numberInSurah").asInt}﴾ ${a.get("text").asString}\n\n")
-                    }
+                    for (i in 0 until ayahs.size()) { val a = ayahs[i].asJsonObject; sb.append("\u064F${a.get("numberInSurah").asInt}\u064E ${a.get("text").asString}\n\n") }
                     activity?.runOnUiThread { tv.text = sb.toString() }
-                } catch (e: Exception) {
-                    activity?.runOnUiThread { tv.text = "خطأ في تحميل التفسير" }
-                }
+                } catch (e: Exception) { activity?.runOnUiThread { tv.text = "خطأ في تحميل التفسير" } }
             }.start()
         }
         return view
     }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mediaPlayer?.release(); mediaPlayer = null
-    }
+    override fun onDestroyView() { super.onDestroyView(); mediaPlayer?.release(); mediaPlayer = null }
 }
 READERFRAG
 
@@ -1023,7 +895,6 @@ class PrayerFragment : Fragment() {
         val container = view.findViewById<LinearLayout>(R.id.prayerContainer)
         val cityName = view.findViewById<TextView>(R.id.cityName)
         val hijriDate = view.findViewById<TextView>(R.id.hijriDate)
-
         fun loadPrayer(lat: Double, lon: Double) {
             Thread {
                 try {
@@ -1033,7 +904,6 @@ class PrayerFragment : Fragment() {
                     val timings = data.getAsJsonObject("timings")
                     val date = data.getAsJsonObject("date")
                     val hijri = date.getAsJsonObject("hijri")
-
                     val prayers = listOf(
                         "🌙" to "الفجر" to timings.get("Fajr").asString,
                         "🌅" to "الشروق" to timings.get("Sunrise").asString,
@@ -1043,56 +913,31 @@ class PrayerFragment : Fragment() {
                         "🌙" to "العشاء" to timings.get("Isha").asString
                     )
                     activity?.runOnUiThread {
-                        loading.visibility = View.GONE
-                        container.visibility = View.VISIBLE
+                        loading.visibility = View.GONE; container.visibility = View.VISIBLE
                         cityName.text = "📍 موقعك الحالي"
                         hijriDate.text = "${hijri.get("day").asString} ${hijri.getAsJsonObject("month").get("ar").asString} ${hijri.get("year").asString} هـ"
                         container.removeAllViews()
                         prayers.forEach { (iconName, time) ->
                             val (icon, name) = iconName
                             val card = LinearLayout(requireContext()).apply {
-                                orientation = LinearLayout.HORIZONTAL
-                                setPadding(24,20,24,20)
+                                orientation = LinearLayout.HORIZONTAL; setPadding(24,20,24,20)
                                 background = resources.getDrawable(R.drawable.prayer_card_bg, null)
-                                val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-                                lp.bottomMargin = 12
-                                layoutParams = lp
+                                val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT); lp.bottomMargin = 12; layoutParams = lp
                             }
-                            val iconTv = TextView(requireContext()).apply {
-                                text = icon; textSize = 24f
-                            }
-                            val nameTv = TextView(requireContext()).apply {
-                                text = name; textSize = 18f
-                                setTextColor(resources.getColor(R.color.text_primary, null))
-                                setPadding(16,0,0,0)
-                                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-                            }
-                            val timeTv = TextView(requireContext()).apply {
-                                text = time; textSize = 20f; setTypeface(null, android.graphics.Typeface.BOLD)
-                                setTextColor(resources.getColor(R.color.gold, null))
-                            }
-                            card.addView(iconTv); card.addView(nameTv); card.addView(timeTv)
-                            container.addView(card)
+                            val iconTv = TextView(requireContext()).apply { text = icon; textSize = 24f }
+                            val nameTv = TextView(requireContext()).apply { text = name; textSize = 18f; setTextColor(resources.getColor(R.color.text_primary, null)); setPadding(16,0,0,0); layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f) }
+                            val timeTv = TextView(requireContext()).apply { text = time; textSize = 20f; setTypeface(null, android.graphics.Typeface.BOLD); setTextColor(resources.getColor(R.color.gold, null)) }
+                            card.addView(iconTv); card.addView(nameTv); card.addView(timeTv); container.addView(card)
                         }
                     }
-                } catch (e: Exception) {
-                    activity?.runOnUiThread {
-                        loading.visibility = View.GONE
-                        cityName.text = "خطأ في تحميل أوقات الصلاة"
-                    }
-                }
+                } catch (e: Exception) { activity?.runOnUiThread { loading.visibility = View.GONE; cityName.text = "خطأ في تحميل أوقات الصلاة" } }
             }.start()
         }
-
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             val lm = requireContext().getSystemService(android.content.Context.LOCATION_SERVICE) as LocationManager
             val loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) ?: lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-            if (loc != null) loadPrayer(loc.latitude, loc.longitude)
-            else loadPrayer(24.7136, 46.6753) // Riyadh default
-        } else {
-            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 100)
-            loadPrayer(24.7136, 46.6753)
-        }
+            if (loc != null) loadPrayer(loc.latitude, loc.longitude) else loadPrayer(24.7136, 46.6753)
+        } else { requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 100); loadPrayer(24.7136, 46.6753) }
         return view
     }
 }
@@ -1119,8 +964,7 @@ class QiblaFragment : Fragment(), SensorEventListener {
     private var sensorManager: SensorManager? = null
     private var qiblaDirection: TextView? = null
     private var qiblaDegrees: TextView? = null
-    private val qiblaAngle = 245.0 // approximate for Saudi Arabia
-
+    private val qiblaAngle = 245.0
     override fun onCreateView(inflater: LayoutInflater, c: ViewGroup?, s: Bundle?): View {
         val view = inflater.inflate(R.layout.fragment_qibla, c, false)
         qiblaDirection = view.findViewById(R.id.qiblaDirection)
@@ -1128,23 +972,11 @@ class QiblaFragment : Fragment(), SensorEventListener {
         sensorManager = requireContext().getSystemService(Context.SENSOR_SERVICE) as SensorManager
         return view
     }
-
-    override fun onResume() {
-        super.onResume()
-        sensorManager?.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)?.let {
-            sensorManager?.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        sensorManager?.unregisterListener(this)
-    }
-
+    override fun onResume() { super.onResume(); sensorManager?.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)?.let { sensorManager?.registerListener(this, it, SensorManager.SENSOR_DELAY_UI) } }
+    override fun onPause() { super.onPause(); sensorManager?.unregisterListener(this) }
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type == Sensor.TYPE_ROTATION_VECTOR) {
-            val rotMatrix = FloatArray(9)
-            val orientation = FloatArray(3)
+            val rotMatrix = FloatArray(9); val orientation = FloatArray(3)
             SensorManager.getRotationMatrixFromVector(rotMatrix, event.values)
             SensorManager.getOrientation(rotMatrix, orientation)
             val azimuth = Math.toDegrees(orientation[0].toDouble())
@@ -1153,7 +985,6 @@ class QiblaFragment : Fragment(), SensorEventListener {
             qiblaDegrees?.text = String.format("%.0f°", bearing)
         }
     }
-
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 }
 QIBLAFRAG
@@ -1183,31 +1014,20 @@ class BookmarksFragment : Fragment() {
         val prefs = requireContext().getSharedPreferences("quran_prefs", Context.MODE_PRIVATE)
         val bookmarksStr = prefs.getString("bookmarks", "") ?: ""
         val bookmarks = if (bookmarksStr.isNotEmpty()) bookmarksStr.split(",").mapNotNull { it.toIntOrNull() } else emptyList()
-
-        if (bookmarks.isEmpty()) {
-            empty.visibility = View.VISIBLE
-            recycler.visibility = View.GONE
-        } else {
+        if (bookmarks.isEmpty()) { empty.visibility = View.VISIBLE; recycler.visibility = View.GONE }
+        else {
             recycler.layoutManager = LinearLayoutManager(requireContext())
             recycler.adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 override fun getItemCount() = bookmarks.size
                 override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-                    val tv = TextView(parent.context).apply {
-                        textSize = 18f; setPadding(24,20,24,20)
-                        setTextColor(resources.getColor(R.color.text_primary, null))
-                        setBackgroundResource(R.drawable.prayer_card_bg)
-                        val lp = RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT)
-                        lp.bottomMargin = 8; layoutParams = lp
-                    }
+                    val tv = TextView(parent.context).apply { textSize = 18f; setPadding(24,20,24,20); setTextColor(resources.getColor(R.color.text_primary, null)); setBackgroundResource(R.drawable.prayer_card_bg)
+                        val lp = RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT); lp.bottomMargin = 8; layoutParams = lp }
                     return object : RecyclerView.ViewHolder(tv) {}
                 }
                 override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-                    val page = bookmarks[position]
-                    val surah = QuranData.getSurahByPage(page)
+                    val page = bookmarks[position]; val surah = QuranData.getSurahByPage(page)
                     (holder.itemView as TextView).text = "📖 صفحة $page - سورة ${surah.name}"
-                    holder.itemView.setOnClickListener {
-                        (activity as? MainActivity)?.openReader(surah.n, page)
-                    }
+                    holder.itemView.setOnClickListener { (activity as? MainActivity)?.openReader(surah.n, page) }
                 }
             }
         }
@@ -1215,6 +1035,312 @@ class BookmarksFragment : Fragment() {
     }
 }
 BOOKMARKSFRAG
+
+# ========== MoreFragment.kt (NEW) ==========
+cat > $PROJECT/app/src/main/java/$PKG_PATH/ui/MoreFragment.kt << 'MOREFRAG'
+package tech.meshari.quran.ui
+
+import android.content.Intent
+import android.graphics.Color
+import android.graphics.Typeface
+import android.os.Bundle
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.ScrollView
+import android.widget.TextView
+import androidx.fragment.app.Fragment
+import tech.meshari.quran.AboutActivity
+import tech.meshari.quran.MainActivity
+import tech.meshari.quran.R
+
+class MoreFragment : Fragment() {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val sv = ScrollView(requireContext()).apply { setBackgroundColor(Color.parseColor("#0A1929")) }
+        val ll = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL; setPadding(32, 40, 32, 40)
+        }
+        ll.addView(ImageView(requireContext()).apply {
+            setImageResource(R.drawable.app_logo)
+            layoutParams = LinearLayout.LayoutParams(200, 200).apply { gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = 16 }
+        })
+        ll.addView(TextView(requireContext()).apply {
+            text = "المزيد"; setTextColor(Color.parseColor("#D4A847")); textSize = 26f
+            setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER; setPadding(0, 0, 0, 32)
+        })
+        fun makeCard(icon: String, title: String, subtitle: String, onClick: () -> Unit): View {
+            val card = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.HORIZONTAL; setPadding(32, 28, 32, 28)
+                setBackgroundColor(Color.parseColor("#132F4C"))
+                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 16 }
+                setOnClickListener { onClick() }
+            }
+            val iconTv = TextView(requireContext()).apply { text = icon; textSize = 36f; setPadding(0, 0, 24, 0) }
+            val textContainer = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            }
+            textContainer.addView(TextView(requireContext()).apply { text = title; setTextColor(Color.WHITE); textSize = 20f; setTypeface(null, Typeface.BOLD) })
+            textContainer.addView(TextView(requireContext()).apply { text = subtitle; setTextColor(Color.parseColor("#B0BEC5")); textSize = 14f; setPadding(0, 4, 0, 0) })
+            val arrow = TextView(requireContext()).apply { text = "◀"; setTextColor(Color.parseColor("#D4A847")); textSize = 20f }
+            card.addView(iconTv); card.addView(textContainer); card.addView(arrow)
+            return card
+        }
+        ll.addView(makeCard("📜", "فتاوى إسلامية", "أحكام وفتاوى شرعية من مصادر موثوقة") {
+            (activity as? MainActivity)?.loadFragment(FatwaFragment())
+        })
+        ll.addView(makeCard("🧮", "حاسبة الزكاة", "احسب زكاة المال والذهب والفضة") {
+            (activity as? MainActivity)?.loadFragment(ZakatFragment())
+        })
+        ll.addView(makeCard("ℹ️", "حول التطبيق", "معلومات عن التطبيق والمطور") {
+            startActivity(Intent(requireContext(), AboutActivity::class.java))
+        })
+        sv.addView(ll)
+        return sv
+    }
+}
+MOREFRAG
+
+# ========== FatwaFragment.kt (NEW) ==========
+cat > $PROJECT/app/src/main/java/$PKG_PATH/ui/FatwaFragment.kt << 'FATWAFRAG'
+package tech.meshari.quran.ui
+
+import android.graphics.Color
+import android.graphics.Typeface
+import android.os.Bundle
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.ScrollView
+import android.widget.TextView
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import tech.meshari.quran.R
+
+class FatwaFragment : Fragment() {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val sv = ScrollView(requireContext()).apply { setBackgroundColor(Color.parseColor("#0A1929")) }
+        val ll = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL; setPadding(32, 40, 32, 40)
+        }
+        ll.addView(ImageView(requireContext()).apply {
+            setImageResource(R.drawable.app_logo)
+            layoutParams = LinearLayout.LayoutParams(160, 160).apply { gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = 16 }
+        })
+        ll.addView(TextView(requireContext()).apply {
+            text = "📜 فتاوى إسلامية"; setTextColor(Color.parseColor("#D4A847")); textSize = 24f
+            setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER; setPadding(0, 0, 0, 8)
+        })
+        ll.addView(TextView(requireContext()).apply {
+            text = "أحكام وفتاوى شرعية من مصادر موثوقة"; setTextColor(Color.parseColor("#B0BEC5")); textSize = 14f
+            gravity = Gravity.CENTER; setPadding(0, 0, 0, 32)
+        })
+        val categories = listOf(
+            "🕌" to "الصلاة" to "أحكام الصلاة والطهارة",
+            "🌙" to "الصيام" to "أحكام الصيام وشهر رمضان",
+            "💰" to "الزكاة" to "أحكام الزكاة والصدقات",
+            "🕋" to "الحج والعمرة" to "أحكام الحج والعمرة والمناسك",
+            "🤝" to "المعاملات" to "أحكام البيع والشراء والتجارة",
+            "👨‍👩‍👧‍👦" to "الأسرة" to "أحكام الزواج والطلاق والنفقة",
+            "📖" to "العقيدة" to "أصول العقيدة الإسلامية",
+            "🤲" to "الأذكار والأدعية" to "أذكار اليوم والليلة والأدعية المأثورة"
+        )
+        categories.forEach { (iconTitle, desc) ->
+            val (icon, title) = iconTitle
+            val card = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.HORIZONTAL; setPadding(28, 24, 28, 24)
+                setBackgroundColor(Color.parseColor("#132F4C"))
+                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 12 }
+                setOnClickListener { Toast.makeText(requireContext(), "قريباً - $title", Toast.LENGTH_SHORT).show() }
+            }
+            val iconTv = TextView(requireContext()).apply { text = icon; textSize = 32f; setPadding(0, 0, 20, 0) }
+            val textCont = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            }
+            textCont.addView(TextView(requireContext()).apply { text = title; setTextColor(Color.WHITE); textSize = 18f; setTypeface(null, Typeface.BOLD) })
+            textCont.addView(TextView(requireContext()).apply { text = desc; setTextColor(Color.parseColor("#B0BEC5")); textSize = 13f; setPadding(0, 4, 0, 0) })
+            val arrow = TextView(requireContext()).apply { text = "◀"; setTextColor(Color.parseColor("#D4A847")); textSize = 18f }
+            card.addView(iconTv); card.addView(textCont); card.addView(arrow)
+            ll.addView(card)
+        }
+        sv.addView(ll)
+        return sv
+    }
+}
+FATWAFRAG
+
+# ========== ZakatFragment.kt (NEW) ==========
+cat > $PROJECT/app/src/main/java/$PKG_PATH/ui/ZakatFragment.kt << 'ZAKATFRAG'
+package tech.meshari.quran.ui
+
+import android.graphics.Color
+import android.graphics.Typeface
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.*
+import androidx.fragment.app.Fragment
+import tech.meshari.quran.R
+
+class ZakatFragment : Fragment() {
+    private var goldPrice24 = 310.0
+    private var silverPrice = 3.7
+    private val goldEntries = mutableListOf<Pair<EditText, Spinner>>()
+    private var moneyInput: EditText? = null
+    private var silverInput: EditText? = null
+    private var resultText: TextView? = null
+    private var goldContainer: LinearLayout? = null
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val sv = ScrollView(requireContext()).apply { setBackgroundColor(Color.parseColor("#0A1929")) }
+        val ll = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL; setPadding(32, 40, 32, 40) }
+
+        ll.addView(ImageView(requireContext()).apply {
+            setImageResource(R.drawable.app_logo)
+            layoutParams = LinearLayout.LayoutParams(160, 160).apply { gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = 16 }
+        })
+        ll.addView(TextView(requireContext()).apply {
+            text = "🧮 حاسبة الزكاة"; setTextColor(Color.parseColor("#D4A847")); textSize = 24f
+            setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER; setPadding(0, 0, 0, 8)
+        })
+        ll.addView(TextView(requireContext()).apply {
+            text = "احسب زكاة أموالك بدقة"; setTextColor(Color.parseColor("#B0BEC5")); textSize = 14f
+            gravity = Gravity.CENTER; setPadding(0, 0, 0, 32)
+        })
+
+        fun sectionTitle(text: String): TextView {
+            return TextView(requireContext()).apply {
+                this.text = text; setTextColor(Color.parseColor("#D4A847")); textSize = 18f
+                setTypeface(null, Typeface.BOLD); setPadding(0, 24, 0, 12)
+            }
+        }
+
+        fun makeInput(hint: String): EditText {
+            return EditText(requireContext()).apply {
+                this.hint = hint; setHintTextColor(Color.parseColor("#607D8B")); setTextColor(Color.WHITE)
+                textSize = 16f; setBackgroundColor(Color.parseColor("#132F4C")); setPadding(24, 20, 24, 20)
+                inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
+                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 12 }
+                addTextChangedListener(object : TextWatcher {
+                    override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
+                    override fun onTextChanged(s: CharSequence?, st: Int, b: Int, c: Int) {}
+                    override fun afterTextChanged(s: Editable?) { calculateZakat() }
+                })
+            }
+        }
+
+        // === Money Section ===
+        ll.addView(sectionTitle("💵 زكاة المال"))
+        moneyInput = makeInput("المبلغ بالريال السعودي")
+        ll.addView(moneyInput)
+
+        // === Gold Section ===
+        ll.addView(sectionTitle("🥇 زكاة الذهب"))
+        goldContainer = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
+        ll.addView(goldContainer)
+        addGoldEntry()
+
+        val addGoldBtn = Button(requireContext()).apply {
+            text = "➕ إضافة ذهب آخر"; setTextColor(Color.WHITE); setBackgroundColor(Color.parseColor("#1A3D6E"))
+            textSize = 14f; setPadding(24, 12, 24, 12)
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 16 }
+            setOnClickListener { addGoldEntry() }
+        }
+        ll.addView(addGoldBtn)
+
+        // === Silver Section ===
+        ll.addView(sectionTitle("🥈 زكاة الفضة"))
+        silverInput = makeInput("وزن الفضة بالجرام")
+        ll.addView(silverInput)
+
+        // === Result ===
+        ll.addView(View(requireContext()).apply {
+            setBackgroundColor(Color.parseColor("#1E3A5F"))
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 2).apply { topMargin = 24; bottomMargin = 24 }
+        })
+        resultText = TextView(requireContext()).apply {
+            text = "أدخل البيانات لحساب الزكاة"; setTextColor(Color.parseColor("#D4A847")); textSize = 20f
+            setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER; setPadding(0, 16, 0, 16)
+        }
+        ll.addView(resultText)
+
+        ll.addView(TextView(requireContext()).apply {
+            text = "\n📌 ملاحظات:\n• نصاب المال: 85 جرام ذهب عيار 24\n• نصاب الفضة: 595 جرام فضة\n• نسبة الزكاة: 2.5%\n• الأسعار تقريبية - يرجى التأكد من الأسعار الحالية"
+            setTextColor(Color.parseColor("#8899AA")); textSize = 13f; setPadding(0, 24, 0, 0)
+        })
+
+        sv.addView(ll)
+        return sv
+    }
+
+    private fun addGoldEntry() {
+        val row = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 8 }
+        }
+        val input = EditText(requireContext()).apply {
+            hint = "الوزن بالجرام"; setHintTextColor(Color.parseColor("#607D8B")); setTextColor(Color.WHITE)
+            textSize = 15f; setBackgroundColor(Color.parseColor("#132F4C")); setPadding(20, 16, 20, 16)
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply { marginEnd = 8 }
+            addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
+                override fun onTextChanged(s: CharSequence?, st: Int, b: Int, c: Int) {}
+                override fun afterTextChanged(s: Editable?) { calculateZakat() }
+            })
+        }
+        val spinner = Spinner(requireContext()).apply {
+            val karats = arrayOf("عيار 24", "عيار 21", "عيار 18")
+            adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, karats)
+            setBackgroundColor(Color.parseColor("#132F4C"))
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 0.7f)
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) { calculateZakat() }
+                override fun onNothingSelected(p: AdapterView<*>?) {}
+            }
+        }
+        row.addView(input); row.addView(spinner)
+        goldContainer?.addView(row)
+        goldEntries.add(Pair(input, spinner))
+    }
+
+    private fun calculateZakat() {
+        var totalValue = 0.0
+        val money = moneyInput?.text?.toString()?.toDoubleOrNull() ?: 0.0
+        totalValue += money
+        for ((input, spinner) in goldEntries) {
+            val weight = input.text.toString().toDoubleOrNull() ?: 0.0
+            val karatFactor = when (spinner.selectedItemPosition) { 0 -> 1.0; 1 -> 21.0 / 24.0; 2 -> 18.0 / 24.0; else -> 1.0 }
+            totalValue += weight * karatFactor * goldPrice24
+        }
+        val silverWeight = silverInput?.text?.toString()?.toDoubleOrNull() ?: 0.0
+        totalValue += silverWeight * silverPrice
+        val nisab = 85 * goldPrice24
+        if (totalValue >= nisab) {
+            val zakat = totalValue * 0.025
+            resultText?.text = "💰 إجمالي الأصول: ${String.format("%,.2f", totalValue)} ر.س\n✅ الزكاة المستحقة: ${String.format("%,.2f", zakat)} ر.س"
+            resultText?.setTextColor(Color.parseColor("#4CAF50"))
+        } else if (totalValue > 0) {
+            resultText?.text = "إجمالي: ${String.format("%,.2f", totalValue)} ر.س\n❌ لم يبلغ النصاب (${String.format("%,.0f", nisab)} ر.س)"
+            resultText?.setTextColor(Color.parseColor("#FF9800"))
+        } else {
+            resultText?.text = "أدخل البيانات لحساب الزكاة"
+            resultText?.setTextColor(Color.parseColor("#D4A847"))
+        }
+    }
+}
+ZAKATFRAG
 
 # ========== AboutActivity.kt ==========
 cat > $PROJECT/app/src/main/java/$PKG_PATH/AboutActivity.kt << 'ABOUTKT'
@@ -1239,30 +1365,11 @@ class AboutActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val sv = ScrollView(this).apply { setBackgroundColor(Color.parseColor("#0a1628")) }
-        val ll = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            setPadding(48, 80, 48, 80)
-        }
-        val logo = ImageView(this).apply {
-            setImageResource(R.drawable.app_logo)
-            layoutParams = LinearLayout.LayoutParams(300, 300).apply {
-                gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = 32
-            }
-        }
+        val ll = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_HORIZONTAL; setPadding(48, 80, 48, 80) }
+        val logo = ImageView(this).apply { setImageResource(R.drawable.app_logo); layoutParams = LinearLayout.LayoutParams(300, 300).apply { gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = 32 } }
         ll.addView(logo)
-        ll.addView(TextView(this).apply {
-            text = "القرآن الكريم"
-            setTextColor(Color.parseColor("#d4af37")); textSize = 28f
-            setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER
-            setPadding(0, 0, 0, 16)
-        })
-        ll.addView(TextView(this).apply {
-            text = "❤ صدقة جارية ❤"
-            setTextColor(Color.parseColor("#e8b923")); textSize = 22f
-            setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER
-            setPadding(0, 16, 0, 24)
-        })
+        ll.addView(TextView(this).apply { text = "القرآن الكريم"; setTextColor(Color.parseColor("#d4af37")); textSize = 28f; setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER; setPadding(0, 0, 0, 16) })
+        ll.addView(TextView(this).apply { text = "❤ صدقة جارية ❤"; setTextColor(Color.parseColor("#e8b923")); textSize = 22f; setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER; setPadding(0, 16, 0, 24) })
         ll.addView(TextView(this).apply {
             text = "تطبيق القرآن الكريم هو صدقة جارية لوجه الله تعالى.\n\n" +
                 "تم تطوير هذا التطبيق بالاعتماد على مصادر معتمدة وموثوقة:\n\n" +
@@ -1272,54 +1379,26 @@ class AboutActivity : AppCompatActivity() {
                 "• حاسبة الزكاة بأسعار المعادن المحدثة\n" +
                 "• الفتاوى من مصادر شرعية موثوقة\n\n" +
                 "نسأل الله أن يجعل هذا العمل خالصاً لوجهه الكريم\nوأن يجعله في ميزان حسنات كل من ساهم فيه."
-            setTextColor(Color.WHITE); textSize = 16f; gravity = Gravity.CENTER
-            setLineSpacing(8f, 1.2f); setPadding(0, 0, 0, 40)
+            setTextColor(Color.WHITE); textSize = 16f; gravity = Gravity.CENTER; setLineSpacing(8f, 1.2f); setPadding(0, 0, 0, 40)
         })
-        ll.addView(android.view.View(this).apply {
-            setBackgroundColor(Color.parseColor("#1a3a5c"))
-            layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, 2).apply { bottomMargin = 32; topMargin = 8 }
-        })
-        ll.addView(TextView(this).apply {
-            text = "الإصدار: 4.0.0\nتاريخ النشر: مارس 2026"
-            setTextColor(Color.parseColor("#8899aa")); textSize = 14f
-            gravity = Gravity.CENTER; setPadding(0, 0, 0, 32)
-        })
-        ll.addView(TextView(this).apply {
-            text = "للتواصل مع المطور"
-            setTextColor(Color.parseColor("#d4af37")); textSize = 18f
-            setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER
-            setPadding(0, 0, 0, 16)
-        })
-        ll.addView(Button(this).apply {
-            text = "📱 +966555877723"
-            setTextColor(Color.WHITE); setBackgroundColor(Color.parseColor("#1a5c3a"))
-            textSize = 18f; setPadding(48, 24, 48, 24)
-            layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = 24
-            }
+        ll.addView(android.view.View(this).apply { setBackgroundColor(Color.parseColor("#1a3a5c")); layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, 2).apply { bottomMargin = 32; topMargin = 8 } })
+        ll.addView(TextView(this).apply { text = "الإصدار: 4.1.0\nتاريخ النشر: مارس 2026"; setTextColor(Color.parseColor("#8899aa")); textSize = 14f; gravity = Gravity.CENTER; setPadding(0, 0, 0, 32) })
+        ll.addView(TextView(this).apply { text = "للتواصل مع المطور"; setTextColor(Color.parseColor("#d4af37")); textSize = 18f; setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER; setPadding(0, 0, 0, 16) })
+        ll.addView(Button(this).apply { text = "📱 +966555877723"; setTextColor(Color.WHITE); setBackgroundColor(Color.parseColor("#0A1628")); textSize = 18f; setPadding(48, 24, 48, 24)
+            layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = 24 }
             setOnClickListener { startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:+966555877723"))) }
         })
-        ll.addView(Button(this).apply {
-            text = "💬 واتساب"
-            setTextColor(Color.WHITE); setBackgroundColor(Color.parseColor("#25D366"))
-            textSize = 18f; setPadding(48, 24, 48, 24)
-            layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = 40
-            }
+        ll.addView(Button(this).apply { text = "💬 واتساب"; setTextColor(Color.WHITE); setBackgroundColor(Color.parseColor("#1A3D6E")); textSize = 18f; setPadding(48, 24, 48, 24)
+            layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = 40 }
             setOnClickListener { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/966555877723"))) }
         })
-        ll.addView(TextView(this).apply {
-            text = "اللهم اجعل هذا العمل في ميزان حسناتنا يوم القيامة"
-            setTextColor(Color.parseColor("#d4af37")); textSize = 14f
-            gravity = Gravity.CENTER; setTypeface(null, Typeface.ITALIC)
-        })
+        ll.addView(TextView(this).apply { text = "اللهم اجعل هذا العمل في ميزان حسناتنا يوم القيامة"; setTextColor(Color.parseColor("#d4af37")); textSize = 14f; gravity = Gravity.CENTER; setTypeface(null, Typeface.ITALIC) })
         sv.addView(ll); setContentView(sv)
         supportActionBar?.apply { title = "حول التطبيق"; setDisplayHomeAsUpEnabled(true) }
     }
     override fun onSupportNavigateUp(): Boolean { onBackPressed(); return true }
 }
 ABOUTKT
-
 
 # ========== proguard-rules.pro ==========
 cat > $PROJECT/app/proguard-rules.pro << 'PROGUARD'
@@ -1336,13 +1415,8 @@ android.useAndroidX=true
 org.gradle.jvmargs=-Xmx2048m
 GRADLEPROPS
 
-echo "✅ Native Quran Android app v3.0.0 created!"
+echo "✅ Quran Android app v4.1.0 created!"
 echo "📱 Package: tech.meshari.quran"
-echo "🎨 Design: Material Design 3 - Dark Islamic theme"
-echo "🔌 APIs: alquran.cloud + aladhan.com + mp3quran.net"
-echo "🖼️ Quran pages: surahquran.com"
-echo "🎵 16 reciters with audio streaming"
-echo "🕌 Prayer times with location"
-echo "🧭 Qibla compass with sensors"
-echo "📌 Bookmarks with SharedPreferences"
-echo "🚀 Version: 4.0.0 (versionCode 4)"
+echo "🎨 Theme: Blue gradients - NO green"
+echo "🆕 New: Fatwa + Zakat + More menu"
+echo "🚀 Version: 4.1.0 (versionCode 5)"
