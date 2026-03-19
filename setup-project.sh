@@ -74,8 +74,8 @@ android {
         applicationId = "tech.meshari.quran"
         minSdk = 24
         targetSdk = 34
-        versionCode = 5
-        versionName = "4.1.0"
+        versionCode = 6
+        versionName = "4.2.0"
     }
     buildFeatures { viewBinding = true }
     compileOptions {
@@ -1192,15 +1192,20 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import tech.meshari.quran.R
+import org.json.JSONObject
+import java.net.URL
 
 class ZakatFragment : Fragment() {
-    private var goldPrice24 = 310.0
-    private var silverPrice = 3.7
+    private var goldPrice24 = 0.0
+    private var silverPrice = 0.0
     private val goldEntries = mutableListOf<Pair<EditText, Spinner>>()
     private var moneyInput: EditText? = null
     private var silverInput: EditText? = null
     private var resultText: TextView? = null
     private var goldContainer: LinearLayout? = null
+    private var goldPriceText: TextView? = null
+    private var silverPriceText: TextView? = null
+    private var priceStatusText: TextView? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val sv = ScrollView(requireContext()).apply { setBackgroundColor(Color.parseColor("#0A1929")) }
@@ -1216,8 +1221,14 @@ class ZakatFragment : Fragment() {
         })
         ll.addView(TextView(requireContext()).apply {
             text = "احسب زكاة أموالك بدقة"; setTextColor(Color.parseColor("#B0BEC5")); textSize = 14f
-            gravity = Gravity.CENTER; setPadding(0, 0, 0, 32)
+            gravity = Gravity.CENTER; setPadding(0, 0, 0, 16)
         })
+
+        priceStatusText = TextView(requireContext()).apply {
+            text = "⏳ جاري تحميل أسعار الذهب والفضة..."; setTextColor(Color.parseColor("#FFD700")); textSize = 13f
+            gravity = Gravity.CENTER; setPadding(0, 0, 0, 16)
+        }
+        ll.addView(priceStatusText)
 
         fun sectionTitle(text: String): TextView {
             return TextView(requireContext()).apply {
@@ -1240,13 +1251,17 @@ class ZakatFragment : Fragment() {
             }
         }
 
-        // === Money Section ===
         ll.addView(sectionTitle("💵 زكاة المال"))
         moneyInput = makeInput("المبلغ بالريال السعودي")
         ll.addView(moneyInput)
 
-        // === Gold Section ===
         ll.addView(sectionTitle("🥇 زكاة الذهب"))
+        goldPriceText = TextView(requireContext()).apply {
+            text = "سعر الذهب 24: جاري التحميل..."; setTextColor(Color.parseColor("#FFD700")); textSize = 14f
+            setPadding(0, 0, 0, 8)
+        }
+        ll.addView(goldPriceText)
+
         goldContainer = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
         ll.addView(goldContainer)
         addGoldEntry()
@@ -1259,29 +1274,73 @@ class ZakatFragment : Fragment() {
         }
         ll.addView(addGoldBtn)
 
-        // === Silver Section ===
         ll.addView(sectionTitle("🥈 زكاة الفضة"))
+        silverPriceText = TextView(requireContext()).apply {
+            text = "سعر الفضة: جاري التحميل..."; setTextColor(Color.parseColor("#C0C0C0")); textSize = 14f
+            setPadding(0, 0, 0, 8)
+        }
+        ll.addView(silverPriceText)
         silverInput = makeInput("وزن الفضة بالجرام")
         ll.addView(silverInput)
 
-        // === Result ===
         ll.addView(View(requireContext()).apply {
             setBackgroundColor(Color.parseColor("#1E3A5F"))
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 2).apply { topMargin = 24; bottomMargin = 24 }
         })
+
         resultText = TextView(requireContext()).apply {
-            text = "أدخل البيانات لحساب الزكاة"; setTextColor(Color.parseColor("#D4A847")); textSize = 20f
+            text = "جاري تحميل الأسعار..."; setTextColor(Color.parseColor("#D4A847")); textSize = 20f
             setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER; setPadding(0, 16, 0, 16)
         }
         ll.addView(resultText)
 
         ll.addView(TextView(requireContext()).apply {
-            text = "\n📌 ملاحظات:\n• نصاب المال: 85 جرام ذهب عيار 24\n• نصاب الفضة: 595 جرام فضة\n• نسبة الزكاة: 2.5%\n• الأسعار تقريبية - يرجى التأكد من الأسعار الحالية"
+            text = "\n📌 ملاحظات:\n• نصاب المال: 85 جرام ذهب عيار 24\n• نصاب الفضة: 595 جرام فضة\n• نسبة الزكاة: 2.5%\n• الأسعار محدثة مباشرة من السوق العالمي"
             setTextColor(Color.parseColor("#8899AA")); textSize = 13f; setPadding(0, 24, 0, 0)
         })
 
         sv.addView(ll)
+        fetchPrices()
         return sv
+    }
+
+    private fun fetchPrices() {
+        Thread {
+            try {
+                val rateJson = URL("https://api.exchangerate-api.com/v4/latest/USD").readText()
+                val sarRate = JSONObject(rateJson).getJSONObject("rates").getDouble("SAR")
+
+                val goldJson = URL("https://api.gold-api.com/price/XAU").readText()
+                val goldUsdOz = JSONObject(goldJson).getDouble("price")
+                val gp = (goldUsdOz / 31.1035) * sarRate
+                goldPrice24 = gp
+
+                val silverJson = URL("https://api.gold-api.com/price/XAG").readText()
+                val silverUsdOz = JSONObject(silverJson).getDouble("price")
+                val sp = (silverUsdOz / 31.1035) * sarRate
+                silverPrice = sp
+
+                activity?.runOnUiThread {
+                    goldPriceText?.text = "سعر الذهب 24: " + String.format("%.2f", gp) + " ر.س / جرام"
+                    silverPriceText?.text = "سعر الفضة: " + String.format("%.2f", sp) + " ر.س / جرام"
+                    priceStatusText?.text = "✅ الأسعار محدثة مباشرة من السوق العالمي"
+                    priceStatusText?.setTextColor(Color.parseColor("#4CAF50"))
+                    resultText?.text = "أدخل البيانات لحساب الزكاة"
+                    calculateZakat()
+                }
+            } catch (e: Exception) {
+                goldPrice24 = 591.0
+                silverPrice = 9.3
+                activity?.runOnUiThread {
+                    goldPriceText?.text = "سعر الذهب 24: " + String.format("%.2f", goldPrice24) + " ر.س (تقريبي)"
+                    silverPriceText?.text = "سعر الفضة: " + String.format("%.2f", silverPrice) + " ر.س (تقريبي)"
+                    priceStatusText?.text = "⚠️ تعذر تحميل الأسعار - يتم استخدام أسعار تقريبية"
+                    priceStatusText?.setTextColor(Color.parseColor("#FF9800"))
+                    resultText?.text = "أدخل البيانات لحساب الزكاة"
+                    calculateZakat()
+                }
+            }
+        }.start()
     }
 
     private fun addGoldEntry() {
@@ -1316,6 +1375,7 @@ class ZakatFragment : Fragment() {
     }
 
     private fun calculateZakat() {
+        if (goldPrice24 == 0.0) return
         var totalValue = 0.0
         val money = moneyInput?.text?.toString()?.toDoubleOrNull() ?: 0.0
         totalValue += money
@@ -1329,10 +1389,10 @@ class ZakatFragment : Fragment() {
         val nisab = 85 * goldPrice24
         if (totalValue >= nisab) {
             val zakat = totalValue * 0.025
-            resultText?.text = "💰 إجمالي الأصول: ${String.format("%,.2f", totalValue)} ر.س\n✅ الزكاة المستحقة: ${String.format("%,.2f", zakat)} ر.س"
+            resultText?.text = "💰 إجمالي الأصول: " + String.format("%,.2f", totalValue) + " ر.س\n✅ الزكاة المستحقة: " + String.format("%,.2f", zakat) + " ر.س"
             resultText?.setTextColor(Color.parseColor("#4CAF50"))
         } else if (totalValue > 0) {
-            resultText?.text = "إجمالي: ${String.format("%,.2f", totalValue)} ر.س\n❌ لم يبلغ النصاب (${String.format("%,.0f", nisab)} ر.س)"
+            resultText?.text = "إجمالي: " + String.format("%,.2f", totalValue) + " ر.س\n❌ لم يبلغ النصاب (" + String.format("%,.0f", nisab) + " ر.س)"
             resultText?.setTextColor(Color.parseColor("#FF9800"))
         } else {
             resultText?.text = "أدخل البيانات لحساب الزكاة"
@@ -1382,7 +1442,7 @@ class AboutActivity : AppCompatActivity() {
             setTextColor(Color.WHITE); textSize = 16f; gravity = Gravity.CENTER; setLineSpacing(8f, 1.2f); setPadding(0, 0, 0, 40)
         })
         ll.addView(android.view.View(this).apply { setBackgroundColor(Color.parseColor("#1a3a5c")); layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, 2).apply { bottomMargin = 32; topMargin = 8 } })
-        ll.addView(TextView(this).apply { text = "الإصدار: 4.1.0\nتاريخ النشر: مارس 2026"; setTextColor(Color.parseColor("#8899aa")); textSize = 14f; gravity = Gravity.CENTER; setPadding(0, 0, 0, 32) })
+        ll.addView(TextView(this).apply { text = "الإصدار: 4.2.0\nتاريخ النشر: مارس 2026"; setTextColor(Color.parseColor("#8899aa")); textSize = 14f; gravity = Gravity.CENTER; setPadding(0, 0, 0, 32) })
         ll.addView(TextView(this).apply { text = "للتواصل مع المطور"; setTextColor(Color.parseColor("#d4af37")); textSize = 18f; setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER; setPadding(0, 0, 0, 16) })
         ll.addView(Button(this).apply { text = "📱 +966555877723"; setTextColor(Color.WHITE); setBackgroundColor(Color.parseColor("#0A1628")); textSize = 18f; setPadding(48, 24, 48, 24)
             layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = 24 }
@@ -1415,8 +1475,8 @@ android.useAndroidX=true
 org.gradle.jvmargs=-Xmx2048m
 GRADLEPROPS
 
-echo "✅ Quran Android app v4.1.0 created!"
+echo "✅ Quran Android app v4.2.0 created!"
 echo "📱 Package: tech.meshari.quran"
 echo "🎨 Theme: Blue gradients - NO green"
-echo "🆕 New: Fatwa + Zakat + More menu"
-echo "🚀 Version: 4.1.0 (versionCode 5)"
+echo "🆕 New: Fatwa + Zakat (live prices) + More menu"
+echo "🚀 Version: 4.2.0 (versionCode 6)"
