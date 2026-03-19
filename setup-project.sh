@@ -13,7 +13,7 @@ mkdir -p $PROJECT/app/src/main/res/layout
 mkdir -p $PROJECT/app/src/main/res/values
 mkdir -p $PROJECT/app/src/main/res/values-night
 mkdir -p $PROJECT/app/src/main/res/drawable
-mkdir -p $PROJECT/app/src/main/res/mipmap-hdp
+mkdir -p $PROJECT/app/src/main/res/mipmap-hdpi
 mkdir -p $PROJECT/app/src/main/res/mipmap-mdpi
 mkdir -p $PROJECT/app/src/main/res/mipmap-xhdpi
 mkdir -p $PROJECT/app/src/main/res/mipmap-xxhdpi
