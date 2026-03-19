@@ -51,8 +51,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v3.0.0
-          name: "القرآن الكريم v3.0.0"
+          tag_name: v4.1.0
+          name: "القرآن الكريم v4.1.0"
           files: quran-app/quran-signed.apk
           generate_release_notes: true
         env:
