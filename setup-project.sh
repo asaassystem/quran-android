@@ -69,12 +69,12 @@ plugins {
 }
 android {
     namespace = "tech.meshari.quran"
-    compileSdk = 34
+    compileSdk = 35
     defaultConfig {
         applicationId = "tech.meshari.quran"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 6
+        targetSdk = 35
+        versionCode = 7
         versionName = "4.3.0"
     }
     buildFeatures { viewBinding = true }
@@ -118,6 +118,7 @@ cat > $PROJECT/app/src/main/AndroidManifest.xml << 'MANIFEST'
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+        <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
