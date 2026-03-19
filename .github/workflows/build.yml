@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android App
 
 on:
   push:
@@ -31,10 +31,11 @@ jobs:
         with:
           gradle-version: '8.5'
 
-      - name: Build APK
+      - name: Build APK and AAB
         run: |
           cd quran-app
           gradle assembleRelease --no-daemon
+          gradle bundleRelease --no-daemon
 
       - name: Sign APK
         run: |
@@ -42,18 +43,31 @@ jobs:
           keytool -genkey -v -keystore release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias quranapp -storepass quranapp123 -keypass quranapp123 -dname "CN=Quran App,O=Meshari,C=SA"
           ${ANDROID_HOME}/build-tools/34.0.0/apksigner sign --ks release-key.jks --ks-pass pass:quranapp123 --key-pass pass:quranapp123 --out quran-signed.apk app/build/outputs/apk/release/app-release-unsigned.apk
 
+      - name: Sign AAB
+        run: |
+          cd quran-app
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore release-key.jks -storepass quranapp123 -keypass quranapp123 -signedjar quran-signed.aab app/build/outputs/bundle/release/app-release.aab quranapp
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: quran-signed-apk
           path: quran-app/quran-signed.apk
 
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: quran-signed-aab
+          path: quran-app/quran-signed.aab
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v4.2.0
-          name: "القرآن الكريم v4.2.0"
-          files: quran-app/quran-signed.apk
+          tag_name: v4.3.0
+          name: "القرآن الكريم v4.3.0"
+          files: |
+            quran-app/quran-signed.apk
+            quran-app/quran-signed.aab
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
