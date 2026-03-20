@@ -1,65 +1,53 @@
 name: Build Android App
-
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
-
       - name: Create Project Structure
         run: |
           chmod +x setup-project.sh
           bash setup-project.sh
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.5'
-
       - name: Build APK and AAB
         run: |
           cd quran-app
           gradle assembleRelease --no-daemon
           gradle bundleRelease --no-daemon
-
+      - name: Decode Keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > quran-app/upload-keystore.jks
       - name: Sign APK
         run: |
           cd quran-app
-          keytool -genkey -v -keystore release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias quranapp -storepass quranapp123 -keypass quranapp123 -dname "CN=Quran App,O=Meshari,C=SA"
-          ${ANDROID_HOME}/build-tools/34.0.0/apksigner sign --ks release-key.jks --ks-pass pass:quranapp123 --key-pass pass:quranapp123 --out quran-signed.apk app/build/outputs/apk/release/app-release-unsigned.apk
-
+          ${ANDROID_HOME}/build-tools/34.0.0/apksigner sign --ks upload-keystore.jks --ks-pass pass:quranapp2024 --key-pass pass:quranapp2024 --ks-key-alias upload --out quran-signed.apk app/build/outputs/apk/release/app-release-unsigned.apk
       - name: Sign AAB
         run: |
           cd quran-app
-          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore release-key.jks -storepass quranapp123 -keypass quranapp123 -signedjar quran-signed.aab app/build/outputs/bundle/release/app-release.aab quranapp
-
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore upload-keystore.jks -storepass quranapp2024 -keypass quranapp2024 -signedjar quran-signed.aab app/build/outputs/bundle/release/app-release.aab upload
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: quran-signed-apk
           path: quran-app/quran-signed.apk
-
       - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
           name: quran-signed-aab
           path: quran-app/quran-signed.aab
-
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
