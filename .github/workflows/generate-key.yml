@@ -1,0 +1,45 @@
+name: Generate Upload Key
+
+on:
+  workflow_dispatch:
+
+  jobs:
+    generate-key:
+        runs-on: ubuntu-latest
+            steps:
+                  - name: Generate Keystore
+                          run: |
+                                    keytool -genkey -v -keystore upload-keystore.jks \
+                                                -keyalg RSA -keysize 2048 -validity 10000 \
+                                                            -alias upload \
+                                                                        -storepass quranapp2024 \
+                                                                                    -keypass quranapp2024 \
+                                                                                                -dname "CN=Quran App,OU=Development,O=Meshari,L=Riyadh,ST=Riyadh,C=SA"
+
+                                                                                                      - name: Export PEM Certificate
+                                                                                                              run: |
+                                                                                                                        keytool -export -rfc -keystore upload-keystore.jks \
+                                                                                                                                    -alias upload \
+                                                                                                                                                -storepass quranapp2024 \
+                                                                                                                                                            -file upload_certificate.pem
+                                                                                                                                                            
+                                                                                                                                                                  - name: Show Keystore Info
+                                                                                                                                                                          run: |
+                                                                                                                                                                                    echo "=== SHA1 Fingerprint ==="
+                                                                                                                                                                                              keytool -list -v -keystore upload-keystore.jks -storepass quranapp2024 | grep SHA1
+                                                                                                                                                                                                        echo ""
+                                                                                                                                                                                                                  echo "=== KEYSTORE_BASE64 ==="
+                                                                                                                                                                                                                            base64 -w 0 upload-keystore.jks
+                                                                                                                                                                                                                                      echo ""
+                                                                                                                                                                                                                                      
+                                                                                                                                                                                                                                            - name: Upload PEM
+                                                                                                                                                                                                                                                    uses: actions/upload-artifact@v4
+                                                                                                                                                                                                                                                            with:
+                                                                                                                                                                                                                                                                      name: upload-certificate-pem
+                                                                                                                                                                                                                                                                                path: upload_certificate.pem
+                                                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                      - name: Upload Keystore
+                                                                                                                                                                                                                                                                                              uses: actions/upload-artifact@v4
+                                                                                                                                                                                                                                                                                                      with:
+                                                                                                                                                                                                                                                                                                                name: upload-keystore
+                                                                                                                                                                                                                                                                                                                          path: upload-keystore.jks
